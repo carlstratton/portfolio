@@ -1,4 +1,4 @@
-import { BadgeDemoClient } from "./BadgeDemoClient";
+import { Badge3D } from "@/components/Badge3D";
 
 export default function BadgeDemoPage() {
   return (
@@ -9,9 +9,16 @@ export default function BadgeDemoPage() {
         width: "100vw",
         height: "100vh",
         background: "#1a1a1a",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      <BadgeDemoClient />
+      <Badge3D
+        size={200}
+        speed={0.002}
+        style={{ width: 400, height: 400 }}
+      />
     </div>
   );
 }

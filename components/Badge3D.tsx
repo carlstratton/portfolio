@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 type Badge3DProps = {
   size?: number;
   className?: string;
+  style?: React.CSSProperties;
   speed?: number;
   faceTextureSrc?: string;
   bodyColor?: string;
@@ -17,6 +18,7 @@ const SVG_STRING = `<svg width="512" height="512" viewBox="0 0 512 512" fill="no
 export function Badge3D({
   size = 80,
   className,
+  style,
   speed = 0.002,
   faceTextureSrc = "/case-studies/ai-project-badge-totl-front.png",
   bodyColor = "#363636",
@@ -263,5 +265,5 @@ export function Badge3D({
     };
   }, [bodyColor, faceTextureSrc, size, speed]);
 
-  return <div ref={containerRef} className={className} />;
+  return <div ref={containerRef} className={className} style={style} />;
 }
