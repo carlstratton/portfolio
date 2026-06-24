@@ -56,8 +56,6 @@ export function Badge3D({
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(container.clientWidth, container.clientHeight);
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFShadowMap;
       renderer.setClearColor(0x000000, 0);
 
       const canvas = renderer.domElement;
@@ -144,9 +142,6 @@ export function Badge3D({
         metalness: 0.06,
         clearcoat: 1,
         clearcoatRoughness: 0.14,
-        transmission: 0.08,
-        thickness: 0.8,
-        ior: 1.2,
         side: THREE.DoubleSide,
       });
 
@@ -221,6 +216,8 @@ export function Badge3D({
       };
 
       window.addEventListener("resize", onResize);
+
+      renderer.compile(scene, camera);
 
       const animate = () => {
         animationId = requestAnimationFrame(animate);
