@@ -15,7 +15,7 @@ export default function BadgeDemoPage() {
       }}
     >
       <Badge3D
-        size={200}
+        size={95}
         speed={0.002}
         style={{ width: 400, height: 400 }}
       />
