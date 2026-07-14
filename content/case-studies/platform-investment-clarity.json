@@ -18,9 +18,10 @@
     "Fintech",
     "UX strategy"
   ],
-  "typeBadges": ["Mobile", "Interface Design", "Optimisation"],
+  "typeBadges": ["Mobile", "User Interface"],
   "hero": "/case-studies/platform-investment-hero.png",
   "badge": "/case-studies/badges/republic.png",
+  "avatar": "/case-studies/avatars/republic-post-investment.png",
   "cardImage": "/case-studies/thumbnail-platform.png",
   "readTime": 3,
   "summarySections": [

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import styles from "./Header.module.css";
 
 const STORAGE_KEY = "carl-theme";
@@ -17,13 +18,13 @@ export function Header() {
     <header className={styles.header}>
       <div className="page-shell" data-header-shell="true">
         <div className={styles.inner} data-header-inner="true">
-          <a
+          <Link
             href="/"
             className={styles.brand}
             onClick={handleBrandClick}
           >
             Carl Stratton
-          </a>
+          </Link>
           <span className={styles.tagline}>Product, Design, Applied AI</span>
         </div>
       </div>

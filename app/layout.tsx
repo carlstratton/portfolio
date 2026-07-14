@@ -75,6 +75,23 @@ const merriweather = localFont({
   display: "swap",
 });
 
+const gtStandard = localFont({
+  src: [
+    {
+      path: "../public/fonts/gt-standard/GT-Standard-L-Standard-Regular-Trial.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/gt-standard/GT-Standard-L-Standard-Medium-Trial.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+  variable: "--font-gt-standard",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Carl Stratton · Product, Design, Applied AI",
   description:
@@ -100,7 +117,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${googleSans.variable} ${merriweather.variable} ${ubuntuMono.variable}`}
+      className={`${googleSans.variable} ${merriweather.variable} ${ubuntuMono.variable} ${gtStandard.variable}`}
     >
       <body suppressHydrationWarning>
         <script

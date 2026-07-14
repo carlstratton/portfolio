@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type RefObject } from "react";
+import { useState, type RefObject } from "react";
 import type { CaseStudy } from "@/types/caseStudy";
 import styles from "./CaseLayoutTypographic.module.css";
 import { CaseTypographicStory } from "./CaseTypographicBlocks";
@@ -22,10 +22,6 @@ export function CaseLayoutTypographic({
   const router = useRouter();
   const backHref = `/?study=${study.slug}`;
   const [viewMode, setViewMode] = useState<"full" | "summary">("full");
-
-  useEffect(() => {
-    setViewMode("full");
-  }, [study.slug]);
 
   const content = (
     <>

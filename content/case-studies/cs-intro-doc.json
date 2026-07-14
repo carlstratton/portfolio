@@ -16,6 +16,7 @@
   "typeBadges": ["Zero → One", "Discovery", "Research"],
   "hero": "/case-studies/wondr-medical-hero.png",
   "badge": "/case-studies/badges/wondr-medical.png",
+  "avatar": "/case-studies/avatars/wondr-medical.png",
   "cardImage": "/case-studies/thumbnail-wondr-medical.png",
   "readTime": 5,
   "summarySections": [

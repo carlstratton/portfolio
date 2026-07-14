@@ -86,6 +86,8 @@ export interface CaseStudyMeta {
   hero: string;
   /** Optional badge/logo for Selected Projects cards */
   badge?: string;
+  /** Optional colleague/reviewer avatar shown alongside the badge on Selected Projects cards */
+  avatar?: string;
   /** Optional card image (thumbnail) for Selected Projects; falls back to hero */
   cardImage?: string;
   /** Type badges shown at bottom of card (e.g. "ZERO → ONE", "DISCOVERY") */

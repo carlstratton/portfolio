@@ -1,959 +1,678 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AIProjectsSection } from "@/components/AIProjectsSection";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CaseStudy } from "@/types/caseStudy";
-import { Assistant, type AssistantIntent } from "@/components/Assistant";
-import assistantStyles from "@/components/Assistant.module.css";
-import { getAIProjects } from "@/lib/ai-projects";
-import heroStyles from "../app/page.module.css";
 import styles from "./HomeLanding.module.css";
 
-const HERO_EXIT_MS = 420;
 const EMAIL = "cgstratton+website@gmail.com";
 const MAILTO = `mailto:${EMAIL}`;
+const LANDING_STORAGE_KEY = "carl-home-landing-seen-v1";
+const LANDING_DURATION_MS = 1700;
+
+type SectionId =
+  | "introduction"
+  | "work"
+  | "principles"
+  | "references"
+  | "case-studies"
+  | "background"
+  | "contact";
+
+type IntroTab = "designer" | "founder" | "builder";
+
+type SectionMeta = {
+  id: SectionId;
+  label: string;
+};
+
+type WorkMosaicImage = {
+  id: string;
+  src: string;
+  alt: string;
+  label: string;
+};
+
+type Experience = {
+  company: string;
+  title: string;
+  years: string;
+  location: string;
+  logo?: string;
+  logoAlt: string;
+  body: string;
+};
+
+type BackgroundIntroBlock = {
+  heading: string;
+  paragraphs: string[];
+};
+
+const sections: SectionMeta[] = [
+  { id: "introduction", label: "Introduction" },
+  { id: "work", label: "Work" },
+  { id: "principles", label: "Principles" },
+  { id: "references", label: "References" },
+  { id: "case-studies", label: "Case studies" },
+  { id: "background", label: "Background" },
+  { id: "contact", label: "Contact" },
+];
+
+const introCopy: Record<IntroTab, string> = {
+  designer:
+    "Hi there—I’m a Staff product designer, founder, builder and accelerator alum, with over a decade of experience crafting and building user-centric, impactful digital products.",
+  founder:
+    "I co-founded Emblzn (2013) and Shoesie (2018), taking them through Founder Centric and IGNITE accelerators. Emblzn won UK Innovate's Digital Innovation Award for mass customisation, and took me on a business mission to China with the British Consulate.",
+  builder:
+    "Over the past few years, I have built and released several secure, production ready web and iOS products, using AI agentic tools to design, research, prototype, and validate ideas.",
+};
+
+const introTabs: Array<{ id: IntroTab; label: string }> = [
+  { id: "designer", label: "Designer" },
+  { id: "founder", label: "Founder" },
+  { id: "builder", label: "Builder" },
+];
+
+const workMosaicImages: WorkMosaicImage[] = [
+  {
+    id: "investment-amount",
+    src: "/home-work/investment-amount.png",
+    alt: "Investment amount interface for a private market product",
+    label: "Investment flow detail",
+  },
+  {
+    id: "cherryz-phone",
+    src: "/home-work/cherryz-phone.png",
+    alt: "Mobile commerce product grid shown inside an Android phone",
+    label: "Mobile commerce exploration",
+  },
+  {
+    id: "confirm-investment",
+    src: "/home-work/confirm-investment.png",
+    alt: "Swipe to confirm investment interaction",
+    label: "Investment confirmation interaction",
+  },
+  {
+    id: "simply-business",
+    src: "/home-work/simply-business.png",
+    alt: "Business health insurance landing page",
+    label: "Insurance proposition page",
+  },
+  {
+    id: "mendeley",
+    src: "/home-work/mendeley.png",
+    alt: "Research collaboration community interface",
+    label: "Research community product",
+  },
+  {
+    id: "republic-market",
+    src: "/home-work/republic-market.png",
+    alt: "Mobile market screen for investment discovery",
+    label: "Market discovery experience",
+  },
+  {
+    id: "wondr-rooms",
+    src: "/home-work/wondr-rooms.png",
+    alt: "Three mobile screens for Wondr Rooms clinical collaboration",
+    label: "Clinical collaboration rooms",
+  },
+  {
+    id: "whiteboard",
+    src: "/home-work/whiteboard.png",
+    alt: "Carl working at a whiteboard with sticky notes",
+    label: "Discovery workshop",
+  },
+];
+
+const references = [
+  {
+    quote:
+      "Carl had a huge impact, leading the visual design and user experience for the first iteration of our app, which helped put Cherryz on the trajectory we're on today.”",
+    person: "Product Designer, Republic",
+  },
+  {
+    quote:
+      "Carl’s passion and dedication have motivated the team to push through challenges and embrace opportunities for innovation and improvement.”",
+    person: "Product Manager – Republic",
+  },
+  {
+    quote:
+      "Carl's understanding of the design process was instrumental to our success as he led our team. His suggestion to use the opportunity tree played a crucial role in the discovery of Wondr Rooms.”",
+    person: "Product Designer, Wondr Medical",
+  },
+  {
+    quote:
+      "Carl's guidance has been instrumental in shaping my professional development, and I am grateful for the mentorship he has generously offered.”",
+    person: "Product Designer, Republic",
+  },
+];
+
+const experience: Experience[] = [
+  {
+    company: "Republic",
+    title: "Staff Product Designer",
+    years: "2021",
+    location: "Current",
+    logo: "/case-studies/badges/republic.png",
+    logoAlt: "Republic logo",
+    body:
+      "Leading design of new investing experiences across Republic's web and mobile products, from launching the industry's first mobile-native private secondary market to reimagining discovery and checkout experiences. Alongside shaping product strategy through research and experimentation, I established a shared design system, mentored designers, and helped scale the platform across the UK, Europe, and US.",
+  },
+  {
+    company: "Wondr Medical",
+    title: "Founding Product Designer",
+    years: "2020—2021",
+    location: "London",
+    logo: "/case-studies/badges/wondr-medical.png",
+    logoAlt: "Wondr Medical logo",
+    body:
+      "I led product design through a critical time of finding product market fit, using continuous discovery to shape the roadmap and launch Wondr Rooms, a HIPAA-compliant networking platform that supported the company's £12M seed raise. Alongside designing engagement features for global healthcare events, I helped establish Wondr's first design system and grow the design practice.",
+  },
+  {
+    company: "Simply Business",
+    title: "UX Consultant",
+    years: "2020",
+    location: "London",
+    logo: "/case-studies/badges/simply-business.png",
+    logoAlt: "Simply Business logo",
+    body:
+      "As the Lead UX designer working within a Product Discovery Unit, I helped discover, design, and launch new insurance products through continuous customer research and rapid experimentation. Coached by Teresa Torres in Continuous Discovery Habits, I partnered with cross-functional teams to validate opportunities and deliver products for millions of UK small businesses.",
+  },
+  {
+    company: "Cherryz",
+    title: "Founding Designer",
+    years: "2020",
+    location: "London",
+    logo: "/case-studies/badges/cherryz.png",
+    logoAlt: "Cherryz logo",
+    body:
+      "As Cherryz's founding fractional designer, I established the brand and product foundations, shaping the design system, user experience, and early product strategy across web and mobile apps.",
+  },
+  {
+    company: "Farfetch",
+    title: "Lead UX Designer",
+    years: "2016—2017",
+    location: "London",
+    logo: "/case-studies/badges/farfetch.png",
+    logoAlt: "Farfetch logo",
+    body:
+      "I led UX work across commerce and mobile experiences, helping teams translate product strategy into clearer customer journeys and stronger design foundations.",
+  },
+];
+
+const backgroundIntro: BackgroundIntroBlock[] = [
+  {
+    heading: "I was exposed to",
+    paragraphs: [
+      "the London start-up scene in 2010 and have been designing interfaces, products and digital experiences ever since. I have led design at start-ups including Farfetch, Seedrs, and Simply Business, and advised organisations including Workspace, Vodafone, and the NHS on digital strategy and user experience.",
+      "The projects I work on typically involve strategy, research, and problem-solving, to deliver meaningful digital solutions. They combine business thinking with product craft and interface design to shape clear, useful experiences.",
+    ],
+  },
+  {
+    heading: "Applied AI Product Design",
+    paragraphs: [
+      "Over the past few years, I have increasingly integrated AI into my work, using agentic tools to design, prototype, and validate.",
+      "The outcome of that work can be seen in iOS apps and web products, most recently working with a small team to build and launch Top of the League — a social app built around the idea of social football predictions, including releases spanning user accounts, game mechanics, global leaderboards, social groups, notifications, and third-party data integrations.",
+    ],
+  },
+];
 
 function prefersReducedMotion() {
   if (typeof window === "undefined") return true;
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
 }
 
-type RectLike = { top: number; left: number; width: number; height: number };
-
-let scrollBehaviorLockCount = 0;
-let previousInlineScrollBehavior: string | null = null;
-
-function lockSmoothScroll() {
-  if (typeof window === "undefined") return;
-  const root = document.documentElement;
-  scrollBehaviorLockCount += 1;
-  if (scrollBehaviorLockCount === 1) {
-    previousInlineScrollBehavior = root.style.scrollBehavior;
-    // Force "auto" so the browser doesn't apply ease-in/out smoothing
-    // to our constant-speed rAF-based scroll.
-    root.style.scrollBehavior = "auto";
-  }
-}
-
-function unlockSmoothScroll() {
-  if (typeof window === "undefined") return;
-  const root = document.documentElement;
-  scrollBehaviorLockCount = Math.max(0, scrollBehaviorLockCount - 1);
-  if (scrollBehaviorLockCount === 0) {
-    root.style.scrollBehavior = previousInlineScrollBehavior ?? "";
-    previousInlineScrollBehavior = null;
-  }
-}
-
-/** Cubic ease-out: quicker start, softer landing (t ∈ [0, 1]). */
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3;
-}
-
-/**
- * Scroll so `el` lines up with the top of the viewport.
- * Duration scales with distance (`pxPerSecond` + min/max caps); motion is ease-out, not linear.
- */
-function scrollToElementEaseOut(
-  el: HTMLElement,
-  opts?: { pxPerSecond?: number; minMs?: number; maxMs?: number }
-) {
-  const pxPerSecond = opts?.pxPerSecond ?? 1200;
-  const minMs = opts?.minMs ?? 450;
-  const maxMs = opts?.maxMs ?? 1200;
-  const startY = window.scrollY;
-  const targetY = window.scrollY + el.getBoundingClientRect().top;
-  const delta = targetY - startY;
-  if (Math.abs(delta) < 2) return;
-
-  if (prefersReducedMotion()) {
-    window.scrollTo(0, targetY);
-    return;
-  }
-
-  lockSmoothScroll();
-  const durationMs = Math.max(
-    minMs,
-    Math.min(maxMs, (Math.abs(delta) / pxPerSecond) * 1000)
-  );
-
-  const start = performance.now();
-  const step = (now: number) => {
-    const t = Math.min(1, (now - start) / durationMs);
-    const eased = easeOutCubic(t);
-    window.scrollTo(0, startY + delta * eased);
-    if (t < 1) requestAnimationFrame(step);
-    else unlockSmoothScroll();
-  };
-  requestAnimationFrame(step);
-}
-
-const LABELS: Record<AssistantIntent, string> = {
-  projects: "See selected projects",
-  about: "Tell me about Carl",
-  contact: "Make contact",
-};
-
-type Turn = {
-  id: string;
-  intent: AssistantIntent;
-  label: string;
-};
-
-const ALLOWED_INTENTS: AssistantIntent[] = ["projects", "about", "contact"];
-
-function parseFlowString(flow: string): AssistantIntent[] {
-  const parts = flow.split(",").map((s) => s.trim()).filter(Boolean);
-  return parts.filter((p): p is AssistantIntent => ALLOWED_INTENTS.includes(p as AssistantIntent));
+function shortCompany(study: CaseStudy) {
+  return (study.client ?? study.company ?? "Project").replace(/\.(com|co\.uk)$/i, "");
 }
 
 export function HomeLanding({
   studies,
   embeddedInCaseStudy = false,
-  initialFlowOverride,
 }: {
   studies: CaseStudy[];
   embeddedInCaseStudy?: boolean;
   initialFlowOverride?: string;
 }) {
-  const searchParams = useSearchParams();
-  const items = useMemo(() => studies.slice(0, 5), [studies]);
-  const aiProjects = useMemo(() => getAIProjects(), []);
-  const [turns, setTurns] = useState<Turn[]>([]);
-  const [showProjects, setShowProjects] = useState(false);
-  const [chipsDocked, setChipsDocked] = useState(false);
-  const [dockVisible, setDockVisible] = useState(false);
-  const [newTurnId, setNewTurnId] = useState<string | null>(null);
-  const [revealedTurnId, setRevealedTurnId] = useState<string | null>(null);
-  const [workJustRevealed, setWorkJustRevealed] = useState(false);
-  const [heroPhase, setHeroPhase] = useState<"idle" | "exiting" | "gone">("idle");
-  const [heroActiveIntent, setHeroActiveIntent] = useState<AssistantIntent | null>(null);
-  const [firstIntroTurnId, setFirstIntroTurnId] = useState<string | null>(null);
+  const sectionRefs = useRef<Partial<Record<SectionId, HTMLElement>>>({});
+  const landingTimerRef = useRef<number | null>(null);
+  const [activeSection, setActiveSection] = useState<SectionId>("introduction");
+  const [introTab, setIntroTab] = useState<IntroTab>("designer");
+  const [landingChecked, setLandingChecked] = useState(embeddedInCaseStudy);
+  const [showLanding, setShowLanding] = useState(false);
 
-  const chipsWrapRef = useRef<HTMLDivElement | null>(null);
-  const suppressFlowHydrationRef = useRef(false);
-  const turnIdRef = useRef(0);
-  const turnsRef = useRef<Turn[]>([]);
-  const newTurnTimerRef = useRef<number | null>(null);
-  const firstIntroTimerRef = useRef<number | null>(null);
-  const heroExitTimerRef = useRef<number | null>(null);
-  const revealedTurnTimerRef = useRef<number | null>(null);
-  const workRevealTimerRef = useRef<number | null>(null);
-  const showProjectsRef = useRef(showProjects);
+  const caseStudies = useMemo(() => studies.slice(0, 5), [studies]);
+  const setSectionRef = useCallback(
+    (id: SectionId) => (node: HTMLElement | null) => {
+      if (node) sectionRefs.current[id] = node;
+      else delete sectionRefs.current[id];
+    },
+    []
+  );
 
-  useLayoutEffect(() => {
-    return () => {
-      if (newTurnTimerRef.current) window.clearTimeout(newTurnTimerRef.current);
-      if (firstIntroTimerRef.current) window.clearTimeout(firstIntroTimerRef.current);
-      if (heroExitTimerRef.current) window.clearTimeout(heroExitTimerRef.current);
-      if (revealedTurnTimerRef.current) window.clearTimeout(revealedTurnTimerRef.current);
-      if (workRevealTimerRef.current) window.clearTimeout(workRevealTimerRef.current);
-    };
+  const scrollToSection = useCallback((id: SectionId) => {
+    const target = sectionRefs.current[id];
+    if (!target) return;
+    setActiveSection(id);
+    target.scrollIntoView({
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      block: "start",
+    });
+    try {
+      window.history.replaceState({}, "", `#${id}`);
+    } catch {
+      // Ignore history updates in constrained browser contexts.
+    }
+  }, []);
+
+  const enterFullPage = useCallback(() => {
+    if (landingTimerRef.current) window.clearTimeout(landingTimerRef.current);
+    try {
+      window.localStorage.setItem(LANDING_STORAGE_KEY, "true");
+    } catch {
+      // If storage is unavailable, still let the visitor enter the page.
+    }
+    setShowLanding(false);
+    setLandingChecked(true);
   }, []);
 
   useEffect(() => {
-    turnsRef.current = turns;
-  }, [turns]);
-
-  useEffect(() => {
-    showProjectsRef.current = showProjects;
-  }, [showProjects]);
-
-  const markNewTurn = (id: string) => {
-    setNewTurnId(id);
-    if (newTurnTimerRef.current) window.clearTimeout(newTurnTimerRef.current);
-    // Keep this on long enough for delayed CSS animations to finish.
-    newTurnTimerRef.current = window.setTimeout(() => setNewTurnId(null), 720);
-  };
-
-  const markRevealedTurn = (id: string) => {
-    setRevealedTurnId(id);
-    if (revealedTurnTimerRef.current) window.clearTimeout(revealedTurnTimerRef.current);
-    revealedTurnTimerRef.current = window.setTimeout(() => setRevealedTurnId(null), 380);
-  };
-
-  const markWorkRevealed = () => {
-    setWorkJustRevealed(true);
-    if (workRevealTimerRef.current) window.clearTimeout(workRevealTimerRef.current);
-    workRevealTimerRef.current = window.setTimeout(() => setWorkJustRevealed(false), 420);
-  };
-
-  const parseFlowFromUrl = useMemo(() => {
-    const raw = searchParams.get("flow");
-    const legacyIntent = searchParams.get("intent");
-    const parts =
-      raw?.split(",").map((s) => s.trim()).filter(Boolean) ??
-      (legacyIntent ? [legacyIntent] : []);
-    const allowed: AssistantIntent[] = ["projects", "about", "contact"];
-    const next: AssistantIntent[] = [];
-    for (const part of parts) {
-      if (!allowed.includes(part as AssistantIntent)) continue;
-      next.push(part as AssistantIntent);
-    }
-    return next;
-  }, [searchParams]);
-
-  const writeFlowToUrl = (nextFlow: AssistantIntent[], suppressHydration: boolean) => {
     if (embeddedInCaseStudy) return;
+
+    let frame = 0;
+    let hasSeenLanding = false;
     try {
-      if (suppressHydration) suppressFlowHydrationRef.current = true;
-      const url = new URL(window.location.href);
-      url.searchParams.delete("intent");
-      if (nextFlow.length) url.searchParams.set("flow", nextFlow.join(","));
-      else url.searchParams.delete("flow");
-      // Important: don't set `#work` until the work section is actually revealed.
-      window.history.replaceState({}, "", url);
+      hasSeenLanding = window.localStorage.getItem(LANDING_STORAGE_KEY) === "true";
     } catch {
-      // ignore
+      hasSeenLanding = false;
     }
-  };
 
-  const nextTurnId = () => {
-    turnIdRef.current += 1;
-    return `turn-${turnIdRef.current}`;
-  };
+    frame = window.requestAnimationFrame(() => {
+      setLandingChecked(true);
+      setShowLanding(!hasSeenLanding);
+    });
 
-  // Next's recommended pattern is to react to querystring changes via `useSearchParams`.
-  // When embedded in case study, use initialFlowOverride instead of URL.
-  /* eslint-disable react-hooks/set-state-in-effect */
+    return () => window.cancelAnimationFrame(frame);
+  }, [embeddedInCaseStudy]);
+
   useEffect(() => {
-    const nextFlow =
-      embeddedInCaseStudy && initialFlowOverride
-        ? parseFlowString(initialFlowOverride)
-        : parseFlowFromUrl;
-    if (suppressFlowHydrationRef.current) {
-      // We wrote `flow=` ourselves to persist browser-back state; ignore one re-hydration tick.
-      suppressFlowHydrationRef.current = false;
-      return;
-    }
-
-    if (!nextFlow.length) {
-      setTurns([]);
-      setShowProjects(false);
-      setChipsDocked(false);
-      setDockVisible(false);
-      setNewTurnId(null);
-      setRevealedTurnId(null);
-      setWorkJustRevealed(false);
-      setHeroPhase("idle");
-      setHeroActiveIntent(null);
-      setFirstIntroTurnId(null);
-      return;
-    }
-
-    const hydratedTurns: Turn[] = nextFlow.map((intent, idx) => ({
-      id: `hydrated-${idx}`,
-      intent,
-      label: LABELS[intent],
-    }));
-    setTurns(hydratedTurns);
-    turnsRef.current = hydratedTurns;
-    setShowProjects(nextFlow.includes("projects"));
-    setChipsDocked(true);
-    setDockVisible(true);
-    setNewTurnId(null);
-    setRevealedTurnId(null);
-    setWorkJustRevealed(false);
-    setHeroPhase("gone");
-    setHeroActiveIntent(null);
-    setFirstIntroTurnId(null);
-  }, [parseFlowFromUrl, embeddedInCaseStudy, initialFlowOverride, studies]);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  const handleSelect = (data: {
-    intent: AssistantIntent;
-    label: string;
-    sourceEl: HTMLButtonElement;
-  }) => {
-    const currentCount = turnsRef.current.reduce(
-      (acc, t) => acc + (t.intent === data.intent ? 1 : 0),
-      0
+    if (!showLanding) return;
+    landingTimerRef.current = window.setTimeout(
+      enterFullPage,
+      prefersReducedMotion() ? 400 : LANDING_DURATION_MS
     );
-    if (currentCount >= 1) return;
+    return () => {
+      if (landingTimerRef.current) window.clearTimeout(landingTimerRef.current);
+    };
+  }, [enterFullPage, showLanding]);
 
-    const id = nextTurnId();
-    const newTurn: Turn = { id, intent: data.intent, label: data.label };
-    const isFirstInteraction = turnsRef.current.length === 0;
+  useEffect(() => {
+    if (!landingChecked || showLanding) return;
 
-    if (isFirstInteraction) {
-      setHeroActiveIntent(data.intent);
-      setHeroPhase("exiting");
-      // Keep the dock out of the way during the initial micro-interaction.
-      setDockVisible(false);
-      if (heroExitTimerRef.current) window.clearTimeout(heroExitTimerRef.current);
-      heroExitTimerRef.current = window.setTimeout(() => {
-        setHeroPhase("gone");
-        setDockVisible(true);
-      }, prefersReducedMotion() ? 0 : HERO_EXIT_MS);
+    let frame = 0;
 
-      setFirstIntroTurnId(id);
-      if (firstIntroTimerRef.current) window.clearTimeout(firstIntroTimerRef.current);
-      firstIntroTimerRef.current = window.setTimeout(() => setFirstIntroTurnId(null), 900);
-    }
-
-    // Append a new turn (duplicates allowed) and persist URL immediately.
-    const nextTurns = [...turnsRef.current, newTurn];
-    turnsRef.current = nextTurns;
-    setTurns(nextTurns);
-    writeFlowToUrl(nextTurns.map((t) => t.intent), true);
-    markNewTurn(id);
-    markRevealedTurn(id);
-
-    // Dock the assistant after the first selection.
-    setChipsDocked(true);
-    if (!isFirstInteraction) setDockVisible(true);
-
-    const scrollAfterPaint = () => {
-      if (data.intent === "projects") {
-        const wasVisible = showProjectsRef.current;
-        setShowProjects(true);
-        if (!wasVisible) markWorkRevealed();
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            try {
-              const url = new URL(window.location.href);
-              url.hash = "work";
-              window.history.replaceState({}, "", url);
-            } catch {
-              // ignore
-            }
-            const work = document.getElementById("work");
-            if (!work) return;
-            if (prefersReducedMotion()) {
-              work.scrollIntoView({ behavior: "auto", block: "start" });
-              return;
-            }
-            scrollToElementEaseOut(work, { pxPerSecond: 900, minMs: 650, maxMs: 1500 });
-          });
-        });
-        return;
-      }
-
-      requestAnimationFrame(() => {
-        const anchor = document.getElementById(id);
-        if (!anchor) return;
-        if (prefersReducedMotion()) {
-          anchor.scrollIntoView({ behavior: "auto", block: "start" });
-          return;
+    const updateActiveSection = () => {
+      const triggerLine = window.scrollY + window.innerHeight * 0.35;
+      let current: SectionId = sections[0]?.id ?? "introduction";
+      for (const section of sections) {
+        const node = sectionRefs.current[section.id];
+        if (!node) continue;
+        const top = node.getBoundingClientRect().top + window.scrollY;
+        if (top <= triggerLine) {
+          current = section.id;
+        } else {
+          break;
         }
-        scrollToElementEaseOut(anchor, { pxPerSecond: 900, minMs: 650, maxMs: 1500 });
+      }
+      setActiveSection((prev) => (prev === current ? prev : current));
+    };
+
+    const handleUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updateActiveSection();
       });
     };
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(scrollAfterPaint);
-    });
-  };
+    updateActiveSection();
+    window.addEventListener("scroll", handleUpdate, { passive: true });
+    window.addEventListener("resize", handleUpdate);
 
-  type TurnWithMeta = Turn & { occurrence: number };
+    return () => {
+      window.removeEventListener("scroll", handleUpdate);
+      window.removeEventListener("resize", handleUpdate);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [landingChecked, showLanding]);
 
-  const turnsWithMeta: TurnWithMeta[] = useMemo(() => {
-    const counts: Record<AssistantIntent, number> = { projects: 0, about: 0, contact: 0 };
-    return turns.map((t) => {
-      const occurrence = counts[t.intent] ?? 0;
-      counts[t.intent] = occurrence + 1;
-      return { ...t, occurrence };
-    });
-  }, [turns]);
+  if (!landingChecked && !embeddedInCaseStudy) {
+    return <div className={styles.loadingScreen} aria-hidden="true" />;
+  }
 
-  const intentCounts = useMemo(() => {
-    const counts: Record<AssistantIntent, number> = { projects: 0, about: 0, contact: 0 };
-    for (const t of turns) counts[t.intent] += 1;
-    return counts;
-  }, [turns]);
-
-  const disabledIntents = useMemo(() => {
-    return (Object.entries(intentCounts) as Array<[AssistantIntent, number]>)
-      .filter(([, n]) => n >= 1)
-      .map(([intent]) => intent);
-  }, [intentCounts]);
-
-  const firstProjectsIndex = useMemo(() => {
-    return turnsWithMeta.findIndex((t) => t.intent === "projects");
-  }, [turnsWithMeta]);
-
-  const preWorkTurns = useMemo(() => {
-    if (firstProjectsIndex === -1) return turnsWithMeta;
-    return turnsWithMeta.slice(0, firstProjectsIndex + 1);
-  }, [turnsWithMeta, firstProjectsIndex]);
-
-  const postWorkTurns = useMemo(() => {
-    if (firstProjectsIndex === -1) return [];
-    return turnsWithMeta.slice(firstProjectsIndex + 1);
-  }, [turnsWithMeta, firstProjectsIndex]);
+  if (showLanding && !embeddedInCaseStudy) {
+    return <LandingGate activeSection={activeSection} onEnter={enterFullPage} />;
+  }
 
   return (
-    <>
-      <section className={heroStyles.hero}>
-        <div className="page-shell">
-          <div className={heroStyles.heroGrid}>
-            <div className={heroStyles.heroLeft}>
-              <h1>
-                Design for what’s next.{" "}
-                <span className={heroStyles.heroHeadlineSecondary}>
-                Leader, founder, and builder of digital products.
-                </span>
-              </h1>
+    <main className={styles.home}>
+      <LeftMenu activeSection={activeSection} onSelect={scrollToSection} />
 
-              {heroPhase !== "gone" && (
-                <div
-                  ref={chipsWrapRef}
-                  className={styles.chipsWrap}
-                  data-docked={chipsDocked}
-                  data-visible={true}
-                  data-hero-phase={heroPhase}
-                >
-                  <div className={chipsDocked ? styles.chipsDock : undefined}>
-                    <Assistant
-                      docked={chipsDocked}
-                      transitioning={heroPhase === "exiting"}
-                      activeIntent={heroActiveIntent}
-                      disabledIntents={disabledIntents}
-                      onSelect={handleSelect}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {turns.length > 0 && (
-        <section className={styles.turns} aria-label="Conversation">
-          <div className="page-shell">
-            {preWorkTurns.map((turn) => (
-              <div
-                key={turn.id}
-                id={turn.id}
-                className={styles.turn}
-                data-intent={turn.intent}
-                data-new={turn.id === newTurnId}
-                data-first-intro={turn.id === firstIntroTurnId}
-                data-revealed={turn.id === revealedTurnId}
-                data-empty={turn.intent === "projects" && turn.occurrence === 0}
+      <div className={styles.pageColumn}>
+        <section
+          id="introduction"
+          ref={setSectionRef("introduction")}
+          data-section-id="introduction"
+          className={`${styles.section} ${styles.introductionSection}`}
+          aria-labelledby="introduction-heading"
+        >
+          <div className={styles.introTabs} role="tablist" aria-label="Introduction views">
+            {introTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={introTab === tab.id}
+                aria-controls="introduction-copy"
+                className={styles.introTab}
+                data-active={introTab === tab.id}
+                onClick={() => setIntroTab(tab.id)}
               >
-                <div className={styles.turnHeader}>
-                  <div
-                    className={`${assistantStyles.suggestion} ${styles.turnPillStatic}`}
-                    data-turn-pill={turn.id}
-                  >
-                    {turn.label}
-                  </div>
-                </div>
-
-                <div className={styles.turnBody}>
-                  {turn.intent === "projects" ? (
-                    turn.occurrence === 1 ? (
-                      <div className={styles.turnContent}>
-                        <h2 className={styles.turnTitle}>Work</h2>
-                        <div className={styles.panel}>
-                          <p>
-                            You&apos;ve already seen my selected projects. Want to see more work
-                            and opportunities?{" "}
-                            <a href={MAILTO}>Email me</a>.
-                          </p>
-                        </div>
-                      </div>
-                    ) : null
-                  ) : turn.intent === "about" && turn.occurrence === 1 ? (
-                    <div className={styles.turnContent}>
-                      <h2 className={styles.turnTitle}>About Carl</h2>
-                      <div className={styles.panel}>
-                        <p>
-                          That&apos;s the short version. If you&apos;d like more context,{" "}
-                          <a href={MAILTO}>reach out by email</a> and we can chat.
-                        </p>
-                      </div>
-                    </div>
-                  ) : turn.intent === "contact" && turn.occurrence === 1 ? (
-                    <div className={styles.turnContent}>
-                      <h2 className={styles.turnTitle}>Contact</h2>
-                      <div className={styles.panel}>
-                        <p>
-                          I appreciate the interest, but I don&apos;t give out my home address on
-                          my website. Best way to reach me is{" "}
-                          <a href={MAILTO}>email</a>.
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={styles.turnContent}>
-                      <h2 className={styles.turnTitle}>
-                        {turn.intent === "about" ? "About Carl" : "Contact"}
-                      </h2>
-                      <div className={styles.panel}>
-                        {turn.intent === "about" ? (
-                          <>
-                            <div className={styles.aboutImageWrap}>
-                              <Image
-                                src="/about-carl-whiteboard.png"
-                                alt="Carl at a whiteboard during a design session"
-                                width={750}
-                                height={500}
-                                quality={100}
-                                className={styles.aboutImage}
-                              />
-                            </div>
-
-                            <p className={styles.panelIntro}>
-                              Product design rooted in curiosity, user-centricity, and delightfulness.
-                            </p>
-
-                            <p>
-                              As a start-up founder and designer, Carl has spent much of his career
-                              working alongside small teams building new products and businesses,
-                              whilst collaborating with friends, colleagues, founders, and engineers who share
-                              a curiosity for new ideas and care about building thoughtful,
-                              well-considered products.
-                            </p>
-
-                            <h3 className={styles.panelSubheading}>Background</h3>
-
-                            <p>
-                              Carl was exposed to the London start-up scene in 2010 and has been
-                              designing
-                              interfaces and digital experiences ever since. He has led design at
-                              start-ups including Farfetch, Seedrs, and Simply Business, and advised
-                              organisations including Workspace, Vodafone, and the NHS on digital
-                              strategy and product experience.
-                            </p>
-
-                            <p>
-                              As a founder-builder, Carl founded Emblzn (2013) and Shoesie (2018),
-                              both of which went through accelerator programmes including{" "}
-                              <a
-                                href="https://www.ignite.io/"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Ignite
-                              </a>
-                              . Emblzn later won UK Innovate&apos;s Digital Innovation Award for mass
-                              customisation.
-                            </p>
-
-                            <h3 className={styles.panelSubheading}>What Carl does</h3>
-
-                            <p>
-                              The projects Carl works on typically involve strategy, research,
-                              problem-solving, and testing, to deliver meaningful digital solutions. They
-                              combine business thinking with product craft and interface design to
-                              shape clear, useful experiences for the people using them.
-                            </p>
-
-                            <h3 className={styles.panelSubheading}>Applied AI Product Design</h3>
-
-                            <p>
-                              Over the past few years, Carl has increasingly integrated AI into his
-                              product workflow, using agentic tools to design, prototype, and
-                              validate ideas.
-                            </p>
-
-                            <p>
-                              He has built and released multiple production iOS products, most
-                              recently working with a small group of friends to launch{" "}
-                              <a
-                                href="https://apps.apple.com/us/app/totl-top-of-the-league/id6754661450"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                TOTL
-                              </a>
-                              , Top of the League — a social football predictions platform built across
-                              web and React Native, including user accounts, game mechanics,
-                              leaderboards, social groups, notifications, and third-party data
-                              integrations.
-                            </p>
-
-                            <p>
-                              Thanks for taking the time to read. If you&apos;re working on something
-                              interesting, feel free to get in touch and say hello.
-                            </p>
-
-                            <div className={styles.panelLinks}>
-                              <a href={MAILTO}>Email</a>
-                              <a
-                                href="https://www.linkedin.com/in/cgstratton/"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                LinkedIn
-                              </a>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <p>
-                              Email is best but I&apos;m also on LinkedIn. Or if you believe good
-                              conversation happens over a chessboard or between padel points,
-                              you can find me on{" "}
-                              <a
-                                href="https://www.chess.com/member/strattonsphere"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Chess.com
-                              </a>{" "}
-                              and{" "}
-                              <a
-                                href="https://app.playtomic.io/profile/user/5987380?utm_source=app_ios&utm_medium=share"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Playtomic
-                              </a>
-                              .
-                            </p>
-                            <div className={styles.panelLinks}>
-                              <a href={MAILTO}>Email</a>
-                              <a
-                                href="https://www.linkedin.com/in/cgstratton/"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                LinkedIn
-                              </a>
-                              <a
-                                href="https://www.chess.com/member/strattonsphere"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Chess.com
-                              </a>
-                              <a
-                                href="https://app.playtomic.io/profile/user/5987380?utm_source=app_ios&utm_medium=share"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Playtomic
-                              </a>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+                {tab.label}
+              </button>
             ))}
+          </div>
+          <h1 id="introduction-heading" className="sr-only">
+            Introduction
+          </h1>
+          <p id="introduction-copy" className={styles.heroStatement}>
+            {introCopy[introTab]}
+          </p>
+        </section>
 
-            {showProjects && (
-              <div className={styles.workWrap} data-revealed={workJustRevealed}>
-                <div className={styles.workStack}>
-                  <div>
-                    <h2 className={styles.turnTitle} id="work">
-                      Selected projects
-                    </h2>
-                    <div className={styles.grid}>
-                      {items.map((study) => (
-                        <Link
-                          key={study.slug}
-                          href={`/work/${study.slug}`}
-                          className={styles.tile}
-                          aria-label={study.title}
-                        >
-                          <div className={styles.cardImageWrap} aria-hidden="true">
-                            <Image
-                              src={study.cardImage ?? study.hero}
-                              alt={study.title}
-                              fill
-                              sizes="(max-width: 720px) 86vw, (max-width: 1100px) 44vw, 566px"
-                              priority={false}
-                              quality={100}
-                              unoptimized={
-                                (study.cardImage ?? study.hero).includes(
-                                  "thumbnail-secondary-market"
-                                )
-                              }
-                              className={styles.cardImage}
-                            />
-                            {study.badge && (
-                              <div className={styles.badgeWrap} aria-hidden="true">
-                                <Image
-                                  src={study.badge}
-                                  alt=""
-                                  width={56}
-                                  height={56}
-                                  quality={100}
-                                  className={styles.badge}
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className={styles.cardMeta}>
-                            <div className={styles.cardEyebrow}>
-                              {((study.client ?? study.company ?? "").replace(/\.(com|co\.uk)$/i, "")).toUpperCase()} · {study.readTime ?? 5} MINUTE READ
-                            </div>
-                            <h3 className={styles.cardTitle}>{study.title}</h3>
-                            <p className={styles.cardSummary}>{study.summary}</p>
-                            {study.typeBadges && study.typeBadges.length > 0 && (
-                              <div className={styles.typeBadges}>
-                                {study.typeBadges.map((badge) => (
-                                  <span key={badge} className={styles.typeBadge}>
-                                    {badge}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+        <section
+          id="work"
+          ref={setSectionRef("work")}
+          data-section-id="work"
+          className={styles.section}
+          aria-labelledby="work-heading"
+        >
+          <h2 id="work-heading" className="sr-only">
+            Work
+          </h2>
+          <WorkMosaic />
+        </section>
 
-                  {aiProjects.length > 0 && (
-                    <div>
-                      <h2 className={styles.turnTitle}>AI projects</h2>
-                      <AIProjectsSection projects={aiProjects} />
-                    </div>
-                  )}
+        <section
+          id="principles"
+          ref={setSectionRef("principles")}
+          data-section-id="principles"
+          className={styles.section}
+          aria-labelledby="principles-heading"
+        >
+          <div className={styles.principlesCopy}>
+            <h2 id="principles-heading">
+              High Craft
+              <br />
+              User Obsessed
+              <br />
+              Always Curious
+              <br />
+              Beauty Matters
+            </h2>
+            <p>
+              These are the principles that shape how I design, lead, and work with others, and that
+              oscillate with the products I build. I put users at the heart of the process, using
+              research and insight to challenge assumptions and shape better products. I’m endlessly
+              curious, always looking to learn, question, and refine my perspective. I believe great
+              work combines ambitious thinking with deep focus—zooming out to understand the bigger
+              picture, then obsessing over the details that make experiences simple, intuitive, and
+              beautiful. Above all, I care deeply about making things that are beautiful, functional
+              and with a high degree of craft.
+            </p>
+          </div>
+        </section>
+
+        <section
+          id="references"
+          ref={setSectionRef("references")}
+          data-section-id="references"
+          className={styles.section}
+          aria-labelledby="references-heading"
+        >
+          <h2 id="references-heading" className="sr-only">
+            References
+          </h2>
+          <div className={styles.referenceList}>
+            {references.map((reference, index) => (
+              <figure key={reference.quote} className={styles.reference} data-offset={index % 2 === 1}>
+                <span className={styles.referenceMark} aria-hidden="true">
+                  “
+                </span>
+                <div className={styles.referenceBody}>
+                  <blockquote>{reference.quote}</blockquote>
+                  <figcaption>{reference.person}</figcaption>
                 </div>
-              </div>
-            )}
-
-            {postWorkTurns.map((turn) => (
-              <div
-                key={turn.id}
-                id={turn.id}
-                className={styles.turn}
-                data-intent={turn.intent}
-                data-new={turn.id === newTurnId}
-                data-first-intro={turn.id === firstIntroTurnId}
-                data-revealed={turn.id === revealedTurnId}
-                data-empty={turn.intent === "projects" && turn.occurrence === 0}
-              >
-                <div className={styles.turnHeader}>
-                  <div
-                    className={`${assistantStyles.suggestion} ${styles.turnPillStatic}`}
-                    data-turn-pill={turn.id}
-                  >
-                    {turn.label}
-                  </div>
-                </div>
-
-                <div className={styles.turnBody}>
-                  {turn.intent === "projects" ? (
-                    turn.occurrence === 1 ? (
-                      <div className={styles.turnContent}>
-                        <h2 className={styles.turnTitle}>Work</h2>
-                        <div className={styles.panel}>
-                          <p>
-                            You&apos;ve already seen my selected projects. Want to see more work
-                            and opportunities?{" "}
-                            <a href={MAILTO}>Email me</a>.
-                          </p>
-                        </div>
-                      </div>
-                    ) : null
-                  ) : turn.intent === "about" && turn.occurrence === 1 ? (
-                    <div className={styles.turnContent}>
-                      <h2 className={styles.turnTitle}>About Carl</h2>
-                      <div className={styles.panel}>
-                        <p>
-                          That&apos;s the short version. If you&apos;d like more context,{" "}
-                          <a href={MAILTO}>reach out by email</a> and we can chat.
-                        </p>
-                      </div>
-                    </div>
-                  ) : turn.intent === "contact" && turn.occurrence === 1 ? (
-                    <div className={styles.turnContent}>
-                      <h2 className={styles.turnTitle}>Contact</h2>
-                      <div className={styles.panel}>
-                        <p>
-                          I appreciate the interest, but I don&apos;t give out my home address on
-                          my website. Best way to reach me is{" "}
-                          <a href={MAILTO}>email</a>.
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={styles.turnContent}>
-                      <h2 className={styles.turnTitle}>
-                        {turn.intent === "about" ? "About Carl" : "Contact"}
-                      </h2>
-                      <div className={styles.panel}>
-                        {turn.intent === "about" ? (
-                          <>
-                            <div className={styles.aboutImageWrap}>
-                              <Image
-                                src="/about-carl-whiteboard.png"
-                                alt="Carl at a whiteboard during a design session"
-                                width={750}
-                                height={500}
-                                quality={100}
-                                className={styles.aboutImage}
-                              />
-                            </div>
-
-                            <p className={styles.panelIntro}>
-                              Product design rooted in curiosity, user-centricity, and delightfulness.
-                            </p>
-
-                            <p>
-                              As a start-up founder and designer, Carl has spent much of his career
-                              working alongside small teams building new products and businesses,
-                              whilst collaborating with friends, colleagues, founders, and engineers who share
-                              a curiosity for new ideas and care about building thoughtful,
-                              well-considered products.
-                            </p>
-
-                            <h3 className={styles.panelSubheading}>Background</h3>
-
-                            <p>
-                              Carl was exposed to the London start-up scene in 2010 and has been
-                              designing
-                              interfaces and digital experiences ever since. He has led design at
-                              start-ups including Farfetch, Seedrs, and Simply Business, and advised
-                              organisations including Workspace, Vodafone, and the NHS on digital
-                              strategy and product experience.
-                            </p>
-
-                            <p>
-                              As a start-up founder, Carl founded Emblzn (2013) and Shoesie (2018),
-                              both of which went through accelerator programmes including{" "}
-                              <a
-                                href="https://www.ignite.io/"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Ignite
-                              </a>
-                              . Emblzn later won UK Innovate&apos;s Digital Innovation Award for mass
-                              customisation.
-                            </p>
-
-                            <h3 className={styles.panelSubheading}>What Carl does</h3>
-
-                            <p>
-                              The projects Carl works on typically involve strategy, research,
-                              problem-solving, and testing, to deliver meaningful digital solutions. They
-                              combine business thinking with product craft and interface design to
-                              shape clear, useful experiences for the people using them.
-                            </p>
-
-                            <h3 className={styles.panelSubheading}>Applied AI Product Design</h3>
-
-                            <p>
-                              Over the past few years, Carl has increasingly integrated AI into his
-                              product workflow, using agentic tools to design, prototype, and
-                              validate ideas.
-                            </p>
-
-                            <p>
-                              He has built and released multiple production iOS products, most
-                              recently working with a small group of friends to launch{" "}
-                              <a
-                                href="https://apps.apple.com/us/app/totl-top-of-the-league/id6754661450"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                TotL
-                              </a>
-                              , Top of the League — a social football predictions app built across
-                              web and React Native, including user accounts, game mechanics,
-                              leaderboards, social groups, notifications, and third-party data
-                              integrations.
-                            </p>
-
-                            <p>
-                              Thanks for taking the time to read. If you&apos;re working on something
-                              interesting, feel free to get in touch and say hello.
-                            </p>
-
-                            <div className={styles.panelLinks}>
-                              <a href={MAILTO}>Email</a>
-                              <a
-                                href="https://www.linkedin.com/in/cgstratton/"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                LinkedIn
-                              </a>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <p>
-                              Email is best but I&apos;m also on LinkedIn. Or if you believe good
-                              conversation happens over a chessboard or between padel points,
-                              you&apos;ll find me on{" "}
-                              <a
-                                href="https://www.chess.com/member/strattonsphere"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Chess.com
-                              </a>{" "}
-                              and{" "}
-                              <a
-                                href="https://app.playtomic.io/profile/user/5987380?utm_source=app_ios&utm_medium=share"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Playtomic
-                              </a>
-                              .
-                            </p>
-                            <div className={styles.panelLinks}>
-                              <a href={MAILTO}>Email</a>
-                              <a
-                                href="https://www.linkedin.com/in/cgstratton/"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                LinkedIn
-                              </a>
-                              <a
-                                href="https://www.chess.com/member/strattonsphere"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Chess.com
-                              </a>
-                              <a
-                                href="https://app.playtomic.io/profile/user/5987380?utm_source=app_ios&utm_medium=share"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Playtomic
-                              </a>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              </figure>
             ))}
           </div>
         </section>
-      )}
 
-      {/* Docked chips for the next step (after response appears) */}
-      {chipsDocked && (
-        <div
-          ref={chipsWrapRef}
-          className={styles.chipsWrap}
-          data-docked={true}
-          data-visible={dockVisible}
+        <section
+          id="case-studies"
+          ref={setSectionRef("case-studies")}
+          data-section-id="case-studies"
+          className={styles.section}
+          aria-labelledby="case-studies-heading"
         >
-          <div className={styles.chipsDock}>
-            <Assistant
-              docked
-              transitioning={false}
-              activeIntent={null}
-              disabledIntents={disabledIntents}
-              onSelect={handleSelect}
-            />
+          <h2 id="case-studies-heading" className="sr-only">
+            Case studies
+          </h2>
+          <div className={styles.caseStudyList}>
+            {caseStudies.map((study) => (
+              <CaseStudyCard key={study.slug} study={study} />
+            ))}
           </div>
-        </div>
-      )}
-    </>
+        </section>
+
+        <section
+          id="background"
+          ref={setSectionRef("background")}
+          data-section-id="background"
+          className={styles.section}
+          aria-labelledby="background-heading"
+        >
+          <h2 id="background-heading" className="sr-only">
+            Background
+          </h2>
+          <div className={styles.backgroundIntro}>
+            {backgroundIntro.map((block) => (
+              <div key={block.heading} className={styles.backgroundIntroBlock}>
+                <h3>{block.heading}</h3>
+                <div className={styles.backgroundIntroText}>
+                  {block.paragraphs.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className={styles.experienceList}>
+            {experience.slice(0, -1).map((item) => (
+              <ExperienceCard key={item.company} item={item} />
+            ))}
+            <div className={styles.experienceFinal}>
+              <ExperienceCard item={experience[experience.length - 1]} />
+              <p className={styles.cvNote}>CV available on request</p>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="contact"
+          ref={setSectionRef("contact")}
+          data-section-id="contact"
+          className={`${styles.section} ${styles.contactSection}`}
+          aria-labelledby="contact-heading"
+        >
+          <h2 id="contact-heading">Let’s make something useful, considered, beautiful, and well made.</h2>
+          <p>
+            Email is best, but I’m also on LinkedIn. If good conversation happens over a chessboard
+            or between padel points, you’ll find me there too.
+          </p>
+          <div className={styles.contactLinks}>
+            <a href={MAILTO}>Email</a>
+            <a href="https://www.linkedin.com/in/cgstratton/" target="_blank" rel="noreferrer">
+              LinkedIn
+            </a>
+            <a href="https://www.chess.com/member/strattonsphere" target="_blank" rel="noreferrer">
+              Chess.com
+            </a>
+            <a
+              href="https://app.playtomic.io/profile/user/5987380?utm_source=app_ios&utm_medium=share"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Playtomic
+            </a>
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }
 
+function CaseStudyCard({ study }: { study: CaseStudy }) {
+  const eyebrow = `${shortCompany(study).toUpperCase()} · ${study.readTime ?? 5} MINUTE READ`;
+
+  return (
+    <article className={styles.caseStudyItem}>
+      <div className={styles.caseAvatars}>
+        {study.avatar && (
+          <div className={styles.caseAvatar} aria-hidden="true">
+            <Image src={study.avatar} alt="" width={80} height={80} unoptimized className={styles.avatarImage} />
+          </div>
+        )}
+        <div className={styles.caseLogo} aria-hidden="true">
+          {study.badge ? (
+            <Image src={study.badge} alt="" fill sizes="80px" className={styles.logoImage} />
+          ) : (
+            <span>{shortCompany(study).slice(0, 2)}</span>
+          )}
+        </div>
+      </div>
+      <div className={styles.caseStudyCopy}>
+        <div className={styles.caseStudyHeader}>
+          <p className={styles.eyebrow}>{eyebrow}</p>
+          <h3>
+            <Link href={`/work/${study.slug}`}>{study.title}</Link>
+          </h3>
+        </div>
+        <p>{study.summary}</p>
+        {study.typeBadges && study.typeBadges.length > 0 && (
+          <ul className={styles.caseMeta}>
+            {study.typeBadges.map((tag) => (
+              <li key={tag}>{tag}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function ExperienceCard({ item }: { item: Experience }) {
+  return (
+    <article className={styles.experienceItem}>
+      <div className={styles.caseLogo} aria-hidden="true">
+        {item.logo ? (
+          <Image src={item.logo} alt="" fill sizes="80px" className={styles.logoImage} />
+        ) : (
+          <span>{item.company.slice(0, 2)}</span>
+        )}
+      </div>
+      <div className={styles.experienceCopy}>
+        <div className={styles.experienceHeader}>
+          <div className={styles.experienceTitleGroup}>
+            <p className={styles.company}>{item.company}</p>
+            <h3>{item.title}</h3>
+          </div>
+          <ul className={styles.caseMeta}>
+            <li>{item.years}</li>
+            <li>{item.location}</li>
+          </ul>
+        </div>
+        <p>{item.body}</p>
+      </div>
+    </article>
+  );
+}
+
+function WorkMosaic() {
+  return (
+    <div className={styles.workMosaic} aria-label="Selected work imagery">
+      {workMosaicImages.map((image) => (
+        <figure
+          key={image.id}
+          className={`${styles.mosaicTile} ${styles[`mosaic_${image.id.replace(/-/g, "_")}`]}`}
+          tabIndex={0}
+        >
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            sizes="(max-width: 980px) 90vw, 900px"
+            className={styles.mosaicImage}
+          />
+          <figcaption className={styles.mosaicTooltip}>{image.label}</figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+function LandingGate({
+  activeSection,
+  onEnter,
+}: {
+  activeSection: SectionId;
+  onEnter: () => void;
+}) {
+  return (
+    <main className={`${styles.home} ${styles.landingGate}`} aria-label="Carl Stratton landing page">
+      <LeftMenu activeSection={activeSection} onSelect={onEnter} />
+      <button type="button" className={styles.landingButton} onClick={onEnter} aria-label="Enter homepage">
+        <span>Carl Stratton</span>
+        <span>Product Design</span>
+        <span>User Experience</span>
+        <span>Applied AI</span>
+      </button>
+    </main>
+  );
+}
+
+function LeftMenu({
+  activeSection,
+  onSelect,
+}: {
+  activeSection: SectionId;
+  onSelect: (id: SectionId) => void;
+}) {
+  return (
+    <nav className={styles.leftMenu} aria-label="Homepage sections">
+      {sections.map((section) => (
+        <button
+          key={section.id}
+          type="button"
+          onClick={() => onSelect(section.id)}
+          aria-current={activeSection === section.id ? "true" : undefined}
+          className={styles.menuItem}
+          data-active={activeSection === section.id}
+        >
+          {section.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
