@@ -101,13 +101,13 @@
 .introductionSection {
   width: min(708px, 100%);
   min-height: 720px;
-  padding-top: 216px;
+  padding-top: 236px;
 }
 
 .introTabs {
   display: flex;
   gap: 10px;
-  margin-bottom: 48px;
+  margin-bottom: 24px;
   align-items: center;
   animation: page-enter 270ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
 }
@@ -347,6 +347,12 @@
   letter-spacing: -0.02em;
 }
 
+.caseLogoFull {
+  border: 0;
+  aspect-ratio: 1 / 1;
+  background: url("/case-studies/badges/wondr-medical.png") lightgray -14.468px -14.468px / 136.17% 136.17% no-repeat;
+}
+
 .logoImage {
   object-fit: cover;
 }
@@ -354,6 +360,12 @@
 .logoImage {
   object-fit: contain;
   padding: 6px;
+}
+
+.logoImageFull {
+  object-fit: cover;
+  padding: 0;
+  opacity: 0;
 }
 
 .caseStudyCopy {
@@ -504,7 +516,7 @@
   min-width: 0;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .reference blockquote {

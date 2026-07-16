@@ -541,6 +541,7 @@ export function HomeLanding({
 
 function CaseStudyCard({ study }: { study: CaseStudy }) {
   const eyebrow = `${shortCompany(study).toUpperCase()} · ${study.readTime ?? 5} MINUTE READ`;
+  const isWondrBadge = study.badge?.includes("wondr-medical.png");
 
   return (
     <article className={styles.caseStudyItem}>
@@ -550,9 +551,15 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
             <Image src={study.avatar} alt="" width={80} height={80} unoptimized className={styles.avatarImage} />
           </div>
         )}
-        <div className={styles.caseLogo} aria-hidden="true">
+        <div className={`${styles.caseLogo} ${isWondrBadge ? styles.caseLogoFull : ""}`} aria-hidden="true">
           {study.badge ? (
-            <Image src={study.badge} alt="" fill sizes="80px" className={styles.logoImage} />
+            <Image
+              src={study.badge}
+              alt=""
+              fill
+              sizes="80px"
+              className={`${styles.logoImage} ${isWondrBadge ? styles.logoImageFull : ""}`}
+            />
           ) : (
             <span>{shortCompany(study).slice(0, 2)}</span>
           )}
