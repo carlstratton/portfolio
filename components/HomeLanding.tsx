@@ -4,12 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CaseStudy } from "@/types/caseStudy";
+import { LandingIntro } from "./LandingIntro";
 import styles from "./HomeLanding.module.css";
 
 const EMAIL = "cgstratton+website@gmail.com";
 const MAILTO = `mailto:${EMAIL}`;
 const LANDING_STORAGE_KEY = "carl-home-landing-seen-v1";
-const LANDING_DURATION_MS = 1700;
+const LANDING_BLANK_PAUSE_MS = 220;
 
 type SectionId =
   | "introduction"
@@ -45,7 +46,7 @@ type Experience = {
 };
 
 type BackgroundIntroBlock = {
-  heading: string;
+  heading?: string;
   paragraphs: string[];
 };
 
@@ -63,9 +64,9 @@ const introCopy: Record<IntroTab, string> = {
   designer:
     "Hi there—I’m a Staff product designer, founder, builder and accelerator alum, with over a decade of experience crafting and building user-centric, impactful digital products.",
   founder:
-    "I co-founded Emblzn (2013) and Shoesie (2018), taking them through Founder Centric and IGNITE accelerators. Emblzn won UK Innovate's Digital Innovation Award for mass customisation, and took me on a business mission to China with the British Consulate.",
+    "I co-founded Emblzn (2013) and Shoesie (2018), taking both through Founder Centric and IGNITE accelerators. Emblzn won Innovate UK's Digital Innovation Award for mass customisation and led to a British Consulate trade mission to China.",
   builder:
-    "Over the past few years, I have built and released several secure, production ready web and iOS products, using AI agentic tools to design, research, prototype, and validate ideas.",
+    "Over the past few years, I've built and launched several secure, production-ready web and iOS products, using AI agentic tools to accelerate design, research, prototyping, and validation.",
 };
 
 const introTabs: Array<{ id: IntroTab; label: string }> = [
@@ -203,9 +204,8 @@ const experience: Experience[] = [
 
 const backgroundIntro: BackgroundIntroBlock[] = [
   {
-    heading: "I was exposed to",
     paragraphs: [
-      "the London start-up scene in 2010 and have been designing interfaces, products and digital experiences ever since. I have led design at start-ups including Farfetch, Seedrs, and Simply Business, and advised organisations including Workspace, Vodafone, and the NHS on digital strategy and user experience.",
+      "I was exposed to the London start-up scene in 2010 and have been designing products ever since. I've led design at Farfetch, Seedrs, and Simply Business, and partnered with organisations including Workspace, Vodafone, and the NHS to solve complex product and customer problems.",
       "The projects I work on typically involve strategy, research, and problem-solving, to deliver meaningful digital solutions. They combine business thinking with product craft and interface design to shape clear, useful experiences.",
     ],
   },
@@ -236,7 +236,7 @@ export function HomeLanding({
   initialFlowOverride?: string;
 }) {
   const sectionRefs = useRef<Partial<Record<SectionId, HTMLElement>>>({});
-  const landingTimerRef = useRef<number | null>(null);
+  const blankPauseTimerRef = useRef<number | null>(null);
   const [activeSection, setActiveSection] = useState<SectionId>("introduction");
   const [introTab, setIntroTab] = useState<IntroTab>("designer");
   const [landingChecked, setLandingChecked] = useState(embeddedInCaseStudy);
@@ -267,14 +267,24 @@ export function HomeLanding({
   }, []);
 
   const enterFullPage = useCallback(() => {
-    if (landingTimerRef.current) window.clearTimeout(landingTimerRef.current);
+    setShowLanding(false);
+    setLandingChecked(true);
+  }, []);
+
+  const handleLandingSequenceComplete = useCallback(() => {
     try {
       window.localStorage.setItem(LANDING_STORAGE_KEY, "true");
     } catch {
       // If storage is unavailable, still let the visitor enter the page.
     }
-    setShowLanding(false);
-    setLandingChecked(true);
+    if (blankPauseTimerRef.current) window.clearTimeout(blankPauseTimerRef.current);
+    blankPauseTimerRef.current = window.setTimeout(enterFullPage, LANDING_BLANK_PAUSE_MS);
+  }, [enterFullPage]);
+
+  useEffect(() => {
+    return () => {
+      if (blankPauseTimerRef.current) window.clearTimeout(blankPauseTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -295,17 +305,6 @@ export function HomeLanding({
 
     return () => window.cancelAnimationFrame(frame);
   }, [embeddedInCaseStudy]);
-
-  useEffect(() => {
-    if (!showLanding) return;
-    landingTimerRef.current = window.setTimeout(
-      enterFullPage,
-      prefersReducedMotion() ? 400 : LANDING_DURATION_MS
-    );
-    return () => {
-      if (landingTimerRef.current) window.clearTimeout(landingTimerRef.current);
-    };
-  }, [enterFullPage, showLanding]);
 
   useEffect(() => {
     if (!landingChecked || showLanding) return;
@@ -352,7 +351,7 @@ export function HomeLanding({
   }
 
   if (showLanding && !embeddedInCaseStudy) {
-    return <LandingGate activeSection={activeSection} onEnter={enterFullPage} />;
+    return <LandingGate onSequenceComplete={handleLandingSequenceComplete} />;
   }
 
   return (
@@ -422,14 +421,11 @@ export function HomeLanding({
               Beauty Matters
             </h2>
             <p>
-              These are the principles that shape how I design, lead, and work with others, and that
-              oscillate with the products I build. I put users at the heart of the process, using
-              research and insight to challenge assumptions and shape better products. I’m endlessly
-              curious, always looking to learn, question, and refine my perspective. I believe great
-              work combines ambitious thinking with deep focus—zooming out to understand the bigger
-              picture, then obsessing over the details that make experiences simple, intuitive, and
-              beautiful. Above all, I care deeply about making things that are beautiful, functional
-              and with a high degree of craft.
+              These principles shape how I design, lead, and build products. I put users at the
+              centre of every decision, using research and insights to challenge assumptions and
+              uncover outcome-focused solutions. Naturally curious, I’m comfortable moving between
+              strategy and execution, and obsessed with the details that make products feel simple,
+              intuitive, and beautifully crafted.
             </p>
           </div>
         </section>
@@ -487,9 +483,9 @@ export function HomeLanding({
             Background
           </h2>
           <div className={styles.backgroundIntro}>
-            {backgroundIntro.map((block) => (
-              <div key={block.heading} className={styles.backgroundIntroBlock}>
-                <h3>{block.heading}</h3>
+            {backgroundIntro.map((block, blockIndex) => (
+              <div key={block.heading ?? blockIndex} className={styles.backgroundIntroBlock}>
+                {block.heading && <h3>{block.heading}</h3>}
                 <div className={styles.backgroundIntroText}>
                   {block.paragraphs.map((paragraph, index) => (
                     <p key={index}>{paragraph}</p>
@@ -625,29 +621,22 @@ function WorkMosaic() {
             sizes="(max-width: 980px) 90vw, 900px"
             className={styles.mosaicImage}
           />
-          <figcaption className={styles.mosaicTooltip}>{image.label}</figcaption>
         </figure>
       ))}
     </div>
   );
 }
 
-function LandingGate({
-  activeSection,
-  onEnter,
-}: {
-  activeSection: SectionId;
-  onEnter: () => void;
-}) {
+function LandingGate({ onSequenceComplete }: { onSequenceComplete: () => void }) {
   return (
     <main className={`${styles.home} ${styles.landingGate}`} aria-label="Carl Stratton landing page">
-      <LeftMenu activeSection={activeSection} onSelect={onEnter} />
-      <button type="button" className={styles.landingButton} onClick={onEnter} aria-label="Enter homepage">
-        <span>Carl Stratton</span>
-        <span>Product Design</span>
-        <span>User Experience</span>
-        <span>Applied AI</span>
-      </button>
+      <LandingIntro
+        heading="Carl Stratton"
+        items={["Product Design", "User Experience", "Applied AI"]}
+        onSequenceComplete={onSequenceComplete}
+        ariaLabel="Enter homepage"
+        className={styles.landingButton}
+      />
     </main>
   );
 }
