@@ -30,6 +30,7 @@ type SectionMeta = {
 
 type WorkMosaicImage = {
   id: string;
+  type?: "image" | "embed";
   src: string;
   alt: string;
   label: string;
@@ -62,7 +63,7 @@ const sections: SectionMeta[] = [
 
 const introCopy: Record<IntroTab, string> = {
   designer:
-    "Hi there—I’m a Staff product designer, founder, builder and accelerator alum, with over a decade of experience crafting and building user-centric, impactful digital products.",
+    "Hi there—I’m Carl, a Staff product designer, founder, builder and accelerator alum, with over a decade of experience crafting and building user-centric, impactful digital products.",
   founder:
     "I co-founded Emblzn (2013) and Shoesie (2018), taking both through Founder Centric and IGNITE accelerators. Emblzn won Innovate UK's Digital Innovation Award for mass customisation and led to a British Consulate trade mission to China.",
   builder:
@@ -108,7 +109,8 @@ const workMosaicImages: WorkMosaicImage[] = [
   },
   {
     id: "republic-market",
-    src: "/home-work/republic-market.png",
+    type: "embed",
+    src: "https://embed.figma.com/proto/kM3n5AB3XADNXgEq768iAL/CS-Deck?node-id=2369-370963&scaling=fit-width&content-scaling=responsive&show-proto-sidebar=0&embed-host=localhost&footer=0&hide-ui=1",
     alt: "Mobile market screen for investment discovery",
     label: "Market discovery experience",
   },
@@ -135,7 +137,7 @@ const references = [
   {
     quote:
       "Carl’s passion and dedication have motivated the team to push through challenges and embrace opportunities for innovation and improvement.”",
-    person: "Product Manager – Republic",
+    person: "Product Manager, Republic",
   },
   {
     quote:
@@ -173,7 +175,7 @@ const experience: Experience[] = [
   {
     company: "Simply Business",
     title: "UX Consultant",
-    years: "2020",
+    years: "2018—2020",
     location: "London",
     logo: "/case-studies/badges/simply-business.png",
     logoAlt: "Simply Business logo",
@@ -183,7 +185,7 @@ const experience: Experience[] = [
   {
     company: "Cherryz",
     title: "Founding Designer",
-    years: "2020",
+    years: "2018—2020",
     location: "London",
     logo: "/case-studies/badges/cherryz.png",
     logoAlt: "Cherryz logo",
@@ -206,13 +208,13 @@ const backgroundIntro: BackgroundIntroBlock[] = [
   {
     paragraphs: [
       "I was exposed to the London start-up scene in 2010 and have been designing products ever since. I've led design at Farfetch, Seedrs, and Simply Business, and partnered with organisations including Workspace, Vodafone, and the NHS to solve complex product and customer problems.",
-      "The projects I work on typically involve strategy, research, and problem-solving, to deliver meaningful digital solutions. They combine business thinking with product craft and interface design to shape clear, useful experiences.",
+      "The projects I work on typically involve a large degree of strategy, research, and problem-solving, to deliver meaningful digital solutions. They combine business thinking with product craft and interface design to shape clear, outcome-focused experiences.",
     ],
   },
   {
     heading: "Applied AI Product Design",
     paragraphs: [
-      "Over the past few years, I have increasingly integrated AI into my work, using agentic tools to design, prototype, and validate.",
+      "Over the past few years, I have increasingly integrated AI into my work, using agentic tools to design, prototype, research, and validate.",
       "The outcome of that work can be seen in iOS apps and web products, most recently working with a small team to build and launch Top of the League — a social app built around the idea of social football predictions, including releases spanning user accounts, game mechanics, global leaderboards, social groups, notifications, and third-party data integrations.",
     ],
   },
@@ -225,6 +227,12 @@ function prefersReducedMotion() {
 
 function shortCompany(study: CaseStudy) {
   return (study.client ?? study.company ?? "Project").replace(/\.(com|co\.uk)$/i, "");
+}
+
+function sectionFromHash(): SectionId | null {
+  if (typeof window === "undefined") return null;
+  const hash = window.location.hash.replace(/^#/, "");
+  return sections.some((section) => section.id === hash) ? (hash as SectionId) : null;
 }
 
 export function HomeLanding({
@@ -305,6 +313,27 @@ export function HomeLanding({
 
     return () => window.cancelAnimationFrame(frame);
   }, [embeddedInCaseStudy]);
+
+  useEffect(() => {
+    if (!landingChecked || showLanding) return;
+
+    const hashSection = sectionFromHash();
+    if (!hashSection) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = sectionRefs.current[hashSection];
+      if (!target) return;
+
+      const root = document.documentElement;
+      const previousScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      target.scrollIntoView({ behavior: "auto", block: "start" });
+      root.style.scrollBehavior = previousScrollBehavior;
+      setActiveSection(hashSection);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [landingChecked, showLanding]);
 
   useEffect(() => {
     if (!landingChecked || showLanding) return;
@@ -422,8 +451,8 @@ export function HomeLanding({
             </h2>
             <p>
               These principles shape how I design, lead, and build products. I put users at the
-              centre of every decision, using research and insights to challenge assumptions and
-              uncover outcome-focused solutions. Naturally curious, I’m comfortable moving between
+              centre of my decision making, using research and insights to challenge assumptions and
+              inform outcome-focused solutions. Naturally curious, I’m comfortable moving between
               strategy and execution, and obsessed with the details that make products feel simple,
               intuitive, and beautifully crafted.
             </p>
@@ -512,9 +541,9 @@ export function HomeLanding({
           className={`${styles.section} ${styles.contactSection}`}
           aria-labelledby="contact-heading"
         >
-          <h2 id="contact-heading">Let’s make something useful, considered, beautiful, and well made.</h2>
+          <h2 id="contact-heading">Reach out for a call or coffee.</h2>
           <p>
-            Email is best, but I’m also on LinkedIn. If good conversation happens over a chessboard
+            Email is best, but I’m also on LinkedIn. Or, if you enjoy conversation over a chessboard
             or between padel points, you’ll find me there too.
           </p>
           <div className={styles.contactLinks}>
@@ -586,11 +615,25 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
 }
 
 function ExperienceCard({ item }: { item: Experience }) {
+  const isWondrLogo = item.logo?.includes("wondr-medical.png");
+  const isCherryzLogo = item.logo?.includes("cherryz.png");
+
   return (
     <article className={styles.experienceItem}>
-      <div className={styles.caseLogo} aria-hidden="true">
+      <div
+        className={`${styles.caseLogo} ${isWondrLogo ? styles.caseLogoFull : ""} ${
+          isCherryzLogo ? styles.caseLogoCherryz : ""
+        }`}
+        aria-hidden="true"
+      >
         {item.logo ? (
-          <Image src={item.logo} alt="" fill sizes="80px" className={styles.logoImage} />
+          <Image
+            src={item.logo}
+            alt=""
+            fill
+            sizes="80px"
+            className={`${styles.logoImage} ${isWondrLogo ? styles.logoImageFull : ""}`}
+          />
         ) : (
           <span>{item.company.slice(0, 2)}</span>
         )}
@@ -621,13 +664,25 @@ function WorkMosaic() {
           className={`${styles.mosaicTile} ${styles[`mosaic_${image.id.replace(/-/g, "_")}`]}`}
           tabIndex={0}
         >
-          <Image
-            src={image.src}
-            alt={image.alt}
-            fill
-            sizes="(max-width: 980px) 90vw, 900px"
-            className={styles.mosaicImage}
-          />
+          {image.type === "embed" ? (
+            <iframe
+              src={image.src}
+              title={image.alt}
+              className={styles.mosaicEmbed}
+              loading="eager"
+              allowFullScreen
+            />
+          ) : (
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              sizes="(max-width: 980px) 90vw, 900px"
+              quality={100}
+              unoptimized
+              className={styles.mosaicImage}
+            />
+          )}
         </figure>
       ))}
     </div>

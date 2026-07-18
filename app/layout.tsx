@@ -119,6 +119,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${googleSans.variable} ${merriweather.variable} ${ubuntuMono.variable} ${gtStandard.variable}`}
     >
+      <head>
+        <link rel="preconnect" href="https://embed.figma.com" />
+        <link rel="preconnect" href="https://www.figma.com" />
+        <link rel="dns-prefetch" href="https://embed.figma.com" />
+      </head>
       <body suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{

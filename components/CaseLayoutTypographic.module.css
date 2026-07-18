@@ -2,7 +2,12 @@
   color-scheme: light;
   background: #ffffff;
   color: rgba(0, 0, 0, 0.92);
+  font-family: var(--font-gt-standard), var(--font-body), "Helvetica Neue", Arial, sans-serif;
   padding: var(--space-12) 0 var(--space-16);
+}
+
+.wrap :where(h1, h2, h3, h4, p, li, blockquote, figcaption, button, select, span) {
+  font-family: inherit;
 }
 
 .wrap[data-embedded="true"] {
@@ -40,21 +45,15 @@
   pointer-events: none;
 }
 
-.nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-4);
-  margin-bottom: var(--space-10);
-}
-
 .backLink {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
+  display: inline-flex;
+  width: 131px;
 }
 
-.backLink:hover {
-  color: rgba(0, 0, 0, 0.92);
+.backGraphic {
+  display: block;
+  width: 131px;
+  height: 29px;
 }
 
 .titleGrid {
@@ -149,6 +148,10 @@
   padding-top: var(--space-12);
 }
 
+.footer {
+  padding-top: var(--space-16);
+}
+
 .hero {
   margin: 0 0 var(--space-16);
   padding-top: 0;
@@ -206,10 +209,6 @@
   .metaRow {
     gap: 4px var(--space-6);
     margin-top: calc(var(--space-4) + 16px);
-  }
-
-  .nav {
-    margin-bottom: var(--space-8);
   }
 
   .wrap[data-embedded="true"] {
