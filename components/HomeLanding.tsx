@@ -632,7 +632,9 @@ function ExperienceCard({ item }: { item: Experience }) {
             alt=""
             fill
             sizes="80px"
-            className={`${styles.logoImage} ${isWondrLogo ? styles.logoImageFull : ""}`}
+            className={`${styles.logoImage} ${isWondrLogo ? styles.logoImageFull : ""} ${
+              isCherryzLogo ? styles.logoImageCherryz : ""
+            }`}
           />
         ) : (
           <span>{item.company.slice(0, 2)}</span>

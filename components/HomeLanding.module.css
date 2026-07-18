@@ -384,6 +384,10 @@
   opacity: 0;
 }
 
+.logoImageCherryz {
+  transform: translateY(-6px);
+}
+
 .caseStudyCopy {
   display: flex;
   width: 100%;
