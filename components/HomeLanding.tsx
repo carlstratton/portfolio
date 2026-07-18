@@ -30,7 +30,7 @@ type SectionMeta = {
 
 type WorkMosaicImage = {
   id: string;
-  type?: "image" | "embed";
+  type?: "image" | "video";
   src: string;
   alt: string;
   label: string;
@@ -109,8 +109,8 @@ const workMosaicImages: WorkMosaicImage[] = [
   },
   {
     id: "republic-market",
-    type: "embed",
-    src: "https://embed.figma.com/proto/kM3n5AB3XADNXgEq768iAL/CS-Deck?node-id=2369-370963&scaling=fit-width&content-scaling=responsive&show-proto-sidebar=0&embed-host=localhost&footer=0&hide-ui=1",
+    type: "video",
+    src: "/home-work/prototype-video.mp4",
     alt: "Mobile market screen for investment discovery",
     label: "Market discovery experience",
   },
@@ -664,13 +664,16 @@ function WorkMosaic() {
           className={`${styles.mosaicTile} ${styles[`mosaic_${image.id.replace(/-/g, "_")}`]}`}
           tabIndex={0}
         >
-          {image.type === "embed" ? (
-            <iframe
+          {image.type === "video" ? (
+            <video
               src={image.src}
-              title={image.alt}
-              className={styles.mosaicEmbed}
-              loading="eager"
-              allowFullScreen
+              className={styles.mosaicVideo}
+              aria-label={image.alt}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
             />
           ) : (
             <Image
