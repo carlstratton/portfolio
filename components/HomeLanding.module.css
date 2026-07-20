@@ -208,7 +208,7 @@
 
 .workMosaic {
   position: relative;
-  width: min(1360px, calc(100vw - 80px));
+  width: calc(100vw - 80px);
   margin: 0 0 120px calc(40px - var(--page-column-left));
   aspect-ratio: 1360 / 1372;
   overflow: visible;
