@@ -132,7 +132,7 @@ const references = [
   {
     quote:
       "Carl had a huge impact, leading the visual design and user experience for the first iteration of our app, which helped put Cherryz on the trajectory we're on today.”",
-    person: "Product Designer, Republic",
+    person: "Founder, Cherryz",
   },
   {
     quote:
