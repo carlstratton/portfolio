@@ -11,7 +11,7 @@ const HEADING_DURATION_MS = 500;
 const ITEM_DURATION_MS = 400;
 const ITEM_STAGGER_MS = 140;
 const ITEM_BASE_DELAY_MS = 320;
-const HOLD_MS = 2900;
+const HOLD_MS = 1400;
 const EXIT_DURATION_MS = 420;
 
 type Phase = "revealing" | "holding" | "exiting";
