@@ -249,7 +249,7 @@ export function HomeLanding({
   const sectionRefs = useRef<Partial<Record<SectionId, HTMLElement>>>({});
   const blankPauseTimerRef = useRef<number | null>(null);
   const [activeSection, setActiveSection] = useState<SectionId>("introduction");
-  const [introTab, setIntroTab] = useState<IntroTab>("designer");
+  const [introTab, setIntroTab] = useState<IntroTab>("generalist");
   const [landingChecked, setLandingChecked] = useState(embeddedInCaseStudy);
   const [showLanding, setShowLanding] = useState(false);
 
