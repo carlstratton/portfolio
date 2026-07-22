@@ -21,7 +21,7 @@ type SectionId =
   | "background"
   | "contact";
 
-type IntroTab = "designer" | "founder" | "builder";
+type IntroTab = "generalist" | "designer" | "founder" | "builder";
 
 type SectionMeta = {
   id: SectionId;
@@ -62,15 +62,18 @@ const sections: SectionMeta[] = [
 ];
 
 const introCopy: Record<IntroTab, string> = {
+  generalist:
+    "I'm Carl, a product designer, leader and multi-time founder, with 15 years of experience shaping products, leading teams and working across discovery and delivery, with a strong focus on craft, quality and thoughtful execution.",
   designer:
-    "Hi there—I’m Carl, a Staff product designer, founder, builder and accelerator alum, with over a decade of experience crafting and building user-centric, impactful digital products.",
+    "A Staff product designer with 15 years experience designing digital products for start-ups, scale-ups and beyond. From discovery to iteration, design systems and polished execution, build on high craft, consideration and collaboration.",
   founder:
     "I co-founded Emblzn (2013) and Shoesie (2018), taking both through Founder Centric and IGNITE accelerators. Emblzn won Innovate UK's Digital Innovation Award for mass customisation and led to a British Consulate trade mission to China.",
   builder:
-    "Over the past few years, I've built and launched several secure, production-ready web and iOS products, using AI agentic tools to accelerate design, research, prototyping, and validation.",
+    "I’ve built and launched several secure, production-ready web and iOS products using generative AI tools to accelerate research, design, prototyping and development.",
 };
 
 const introTabs: Array<{ id: IntroTab; label: string }> = [
+  { id: "generalist", label: "Overview" },
   { id: "designer", label: "Designer" },
   { id: "founder", label: "Founder" },
   { id: "builder", label: "Builder" },
