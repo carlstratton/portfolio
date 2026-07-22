@@ -65,7 +65,7 @@ const introCopy: Record<IntroTab, string> = {
   generalist:
     "I'm Carl, a product designer, leader and multi-time founder, with 15 years of experience shaping products, leading teams and working across discovery and delivery, with a strong focus on craft, quality and thoughtful execution.",
   designer:
-    "A Staff product designer with 15 years experience designing digital products for start-ups, scale-ups and beyond. From discovery to design systems and polished execution, built on high craft, consideration and collaboration.",
+    "As a Staff product designer, I work across web and native products for start-ups, scale-ups and beyond, delivering best-in-class work while building trusted environments grounded in collaboration, learning and knowledge sharing.",
   founder:
     "I co-founded customisation and analytics start-ups Emblzn (2013) and Shoesie (2018), taking both through Founder Centric and IGNITE accelerators. Emblzn won Innovate UK's Digital Innovation Award for mass customisation and led to a British Consulate trade mission to China.",
   builder:
