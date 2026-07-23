@@ -595,11 +595,21 @@
 }
 
 .cvNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   color: var(--home-muted);
   font-size: 16px;
   line-height: 1.3;
   text-decoration: none;
+}
+
+.cvNoteIcon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  color: currentColor;
 }
 
 .contactSection {
