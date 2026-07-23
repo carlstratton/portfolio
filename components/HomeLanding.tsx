@@ -69,7 +69,7 @@ const introCopy: Record<IntroTab, string> = {
   founder:
     "I co-founded customisation and analytics start-ups Emblzn (2013) and Shoesie (2018), taking both through Founder Centric and IGNITE accelerators. Emblzn won Innovate UK's Digital Innovation Award for mass customisation and led to a British Consulate trade mission to China.",
   builder:
-    "I’ve built and launched several secure, production-ready web and iOS products using generative AI tools to accelerate research, design, prototyping and development.",
+    "I’ve built and launched several secure, production-ready web and iOS products using generative AI tools to accelerate research, design, prototyping and development. I’m interested in how AI can evolve alongside design teams and the way we work.",
 };
 
 const introTabs: Array<{ id: IntroTab; label: string }> = [
