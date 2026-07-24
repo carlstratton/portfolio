@@ -4,7 +4,6 @@ import { Ubuntu_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { PageTransition } from "@/components/PageTransition";
-import { ThemeProvider } from "@/lib/theme";
 
 const googleSans = localFont({
   src: [
@@ -125,15 +124,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://embed.figma.com" />
       </head>
       <body suppressHydrationWarning>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){if(!localStorage.getItem("carl-theme"))document.documentElement.setAttribute("data-theme","dark")})();`,
-          }}
-        />
-        <ThemeProvider>
-          <PageTransition>{children}</PageTransition>
-          <Analytics />
-        </ThemeProvider>
+        <PageTransition>{children}</PageTransition>
+        <Analytics />
       </body>
     </html>
   );

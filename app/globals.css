@@ -1,11 +1,6 @@
 :root {
   color-scheme: light;
-  --theme-duration: 2s;
-  --theme-easing: cubic-bezier(0.25, 0.1, 0.25, 1);
-  --theme-transition: background var(--theme-duration) var(--theme-easing),
-    background-color var(--theme-duration) var(--theme-easing),
-    color var(--theme-duration) var(--theme-easing),
-    box-shadow var(--theme-duration) var(--theme-easing);
+  --theme-transition: none;
   --heading-color: rgb(19, 19, 19);
   --font-family: var(--font-body), "Helvetica Neue", Arial, sans-serif;
   --font-ampersand: var(--font-family);
@@ -34,40 +29,6 @@
   --space-16: 64px;
   --card-padding: 28px;
   --leading: 140%;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --heading-color: var(--text);
-    color-scheme: dark;
-    --bg: #0c0c0c;
-    --bg-strong: #050505;
-    --surface: #0f0f0f;
-    --surface-muted: #141414;
-    --text: #f1f1f1;
-    --text-muted: #b5b5bb;
-    --text-subtle: #8f8f96;
-    --accent: #f1f1f1;
-    --accent-strong: #ffffff;
-    --border: rgba(255, 255, 255, 0.1);
-    --shadow-soft: none;
-  }
-}
-
-:root[data-theme="dark"] {
-  --heading-color: var(--text);
-  color-scheme: dark;
-  --bg: #0c0c0c;
-  --bg-strong: #050505;
-  --surface: #0f0f0f;
-  --surface-muted: #141414;
-  --text: #f1f1f1;
-  --text-muted: #b5b5bb;
-  --text-subtle: #8f8f96;
-  --accent: #f1f1f1;
-  --accent-strong: #ffffff;
-  --border: rgba(255, 255, 255, 0.1);
-  --shadow-soft: none;
 }
 
 *,
@@ -240,9 +201,5 @@ ul {
 @media (prefers-reduced-motion: reduce) {
   .page-transition {
     animation: none;
-  }
-
-  :root {
-    --theme-duration: 0.2s;
   }
 }
