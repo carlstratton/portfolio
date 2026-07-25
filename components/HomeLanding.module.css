@@ -26,9 +26,12 @@
 }
 
 .landingGate {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
   display: grid;
   min-height: 100vh;
+  background: #ffffff;
 }
 
 .landingButton {

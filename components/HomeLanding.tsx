@@ -10,7 +10,6 @@ import styles from "./HomeLanding.module.css";
 const EMAIL = "cgstratton+website@gmail.com";
 const MAILTO = `mailto:${EMAIL}`;
 const LANDING_STORAGE_KEY = "carl-home-landing-seen-v1";
-const LANDING_BLANK_PAUSE_MS = 220;
 const MOSAIC_MEDIA_DELAY_MS = 1800;
 
 type SectionId =
@@ -248,7 +247,6 @@ export function HomeLanding({
   initialFlowOverride?: string;
 }) {
   const sectionRefs = useRef<Partial<Record<SectionId, HTMLElement>>>({});
-  const blankPauseTimerRef = useRef<number | null>(null);
   const [activeSection, setActiveSection] = useState<SectionId>("introduction");
   const [introTab, setIntroTab] = useState<IntroTab>("generalist");
   const [landingChecked, setLandingChecked] = useState(embeddedInCaseStudy);
@@ -290,15 +288,8 @@ export function HomeLanding({
     } catch {
       // If storage is unavailable, still let the visitor enter the page.
     }
-    if (blankPauseTimerRef.current) window.clearTimeout(blankPauseTimerRef.current);
-    blankPauseTimerRef.current = window.setTimeout(enterFullPage, LANDING_BLANK_PAUSE_MS);
+    enterFullPage();
   }, [enterFullPage]);
-
-  useEffect(() => {
-    return () => {
-      if (blankPauseTimerRef.current) window.clearTimeout(blankPauseTimerRef.current);
-    };
-  }, []);
 
   useEffect(() => {
     if (embeddedInCaseStudy) return;
@@ -394,45 +385,42 @@ export function HomeLanding({
     return <div className={styles.loadingScreen} aria-hidden="true" />;
   }
 
-  if (showLanding && !embeddedInCaseStudy) {
-    return <LandingGate onSequenceComplete={handleLandingSequenceComplete} />;
-  }
-
   return (
-    <main className={styles.home}>
-      <LeftMenu activeSection={activeSection} onSelect={scrollToSection} />
+    <>
+      <main className={styles.home} aria-hidden={showLanding && !embeddedInCaseStudy ? "true" : undefined}>
+        <LeftMenu activeSection={activeSection} onSelect={scrollToSection} />
 
-      <div className={styles.pageColumn}>
-        <section
-          id="introduction"
-          ref={setSectionRef("introduction")}
-          data-section-id="introduction"
-          className={`${styles.section} ${styles.introductionSection}`}
-          aria-labelledby="introduction-heading"
-        >
-          <div className={styles.introTabs} role="tablist" aria-label="Introduction views">
-            {introTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={introTab === tab.id}
-                aria-controls="introduction-copy"
-                className={styles.introTab}
-                data-active={introTab === tab.id}
-                onClick={() => setIntroTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <h1 id="introduction-heading" className="sr-only">
-            Introduction
-          </h1>
-          <p id="introduction-copy" className={styles.heroStatement}>
-            {introCopy[introTab]}
-          </p>
-        </section>
+        <div className={styles.pageColumn}>
+          <section
+            id="introduction"
+            ref={setSectionRef("introduction")}
+            data-section-id="introduction"
+            className={`${styles.section} ${styles.introductionSection}`}
+            aria-labelledby="introduction-heading"
+          >
+            <div className={styles.introTabs} role="tablist" aria-label="Introduction views">
+              {introTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={introTab === tab.id}
+                  aria-controls="introduction-copy"
+                  className={styles.introTab}
+                  data-active={introTab === tab.id}
+                  onClick={() => setIntroTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <h1 id="introduction-heading" className="sr-only">
+              Introduction
+            </h1>
+            <p id="introduction-copy" className={styles.heroStatement}>
+              {introCopy[introTab]}
+            </p>
+          </section>
 
         <section
           id="work"
@@ -596,8 +584,10 @@ export function HomeLanding({
             </a>
           </div>
         </section>
-      </div>
-    </main>
+        </div>
+      </main>
+      {showLanding && !embeddedInCaseStudy && <LandingGate onSequenceComplete={handleLandingSequenceComplete} />}
+    </>
   );
 }
 
@@ -738,7 +728,7 @@ function WorkMosaic({ loadMedia }: { loadMedia: boolean }) {
 
 function LandingGate({ onSequenceComplete }: { onSequenceComplete: () => void }) {
   return (
-    <main className={`${styles.home} ${styles.landingGate}`} aria-label="Carl Stratton landing page">
+    <section className={`${styles.home} ${styles.landingGate}`} aria-label="Carl Stratton landing page">
       <LandingIntro
         heading="Carl Stratton"
         items={["Product Design", "User Experience", "Applied AI"]}
@@ -746,7 +736,7 @@ function LandingGate({ onSequenceComplete }: { onSequenceComplete: () => void })
         ariaLabel="Enter homepage"
         className={styles.landingButton}
       />
-    </main>
+    </section>
   );
 }
 
