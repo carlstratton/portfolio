@@ -1,78 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Ubuntu_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { PageTransition } from "@/components/PageTransition";
-
-const googleSans = localFont({
-  src: [
-    {
-      path: "../public/fonts/google-sans/GoogleSans-Regular.ttf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/google-sans/GoogleSans-Italic.ttf",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../public/fonts/google-sans/GoogleSans-Medium.ttf",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/google-sans/GoogleSans-MediumItalic.ttf",
-      weight: "500",
-      style: "italic",
-    },
-    {
-      path: "../public/fonts/google-sans/GoogleSans-SemiBold.ttf",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/google-sans/GoogleSans-SemiBoldItalic.ttf",
-      weight: "600",
-      style: "italic",
-    },
-    {
-      path: "../public/fonts/google-sans/GoogleSans-Bold.ttf",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/google-sans/GoogleSans-BoldItalic.ttf",
-      weight: "700",
-      style: "italic",
-    },
-  ],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const ubuntuMono = Ubuntu_Mono({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-});
-
-const merriweather = localFont({
-  src: [
-    {
-      path: "../public/fonts/merriweather/Merriweather-VariableFont_opsz,wdth,wght.ttf",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/merriweather/Merriweather-Italic-VariableFont_opsz,wdth,wght.ttf",
-      style: "italic",
-    },
-  ],
-  variable: "--font-title",
-  display: "swap",
-});
 
 const gtStandard = localFont({
   src: [
@@ -116,7 +46,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${googleSans.variable} ${merriweather.variable} ${ubuntuMono.variable} ${gtStandard.variable}`}
+      className={gtStandard.variable}
     >
       <head>
         <link rel="preconnect" href="https://embed.figma.com" />

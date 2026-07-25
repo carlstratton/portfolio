@@ -11,6 +11,7 @@ const EMAIL = "cgstratton+website@gmail.com";
 const MAILTO = `mailto:${EMAIL}`;
 const LANDING_STORAGE_KEY = "carl-home-landing-seen-v1";
 const LANDING_BLANK_PAUSE_MS = 220;
+const MOSAIC_MEDIA_DELAY_MS = 1800;
 
 type SectionId =
   | "introduction"
@@ -252,6 +253,7 @@ export function HomeLanding({
   const [introTab, setIntroTab] = useState<IntroTab>("generalist");
   const [landingChecked, setLandingChecked] = useState(embeddedInCaseStudy);
   const [showLanding, setShowLanding] = useState(false);
+  const [shouldLoadMosaicMedia, setShouldLoadMosaicMedia] = useState(false);
 
   const caseStudies = useMemo(() => studies.slice(0, 5), [studies]);
   const setSectionRef = useCallback(
@@ -336,6 +338,16 @@ export function HomeLanding({
     });
 
     return () => window.cancelAnimationFrame(frame);
+  }, [landingChecked, showLanding]);
+
+  useEffect(() => {
+    if (!landingChecked || showLanding) return;
+
+    const timer = window.setTimeout(() => {
+      setShouldLoadMosaicMedia(true);
+    }, MOSAIC_MEDIA_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
   }, [landingChecked, showLanding]);
 
   useEffect(() => {
@@ -432,7 +444,7 @@ export function HomeLanding({
           <h2 id="work-heading" className="sr-only">
             Work
           </h2>
-          <WorkMosaic />
+          <WorkMosaic loadMedia={shouldLoadMosaicMedia} />
         </section>
 
         <section
@@ -678,7 +690,12 @@ function ExperienceCard({ item }: { item: Experience }) {
   );
 }
 
-function WorkMosaic() {
+function WorkMosaic({ loadMedia }: { loadMedia: boolean }) {
+  const [loadedTiles, setLoadedTiles] = useState<Record<string, boolean>>({});
+  const markTileLoaded = useCallback((id: string) => {
+    setLoadedTiles((current) => (current[id] ? current : { ...current, [id]: true }));
+  }, []);
+
   return (
     <div className={styles.workMosaic} aria-label="Selected work imagery">
       {workMosaicImages.map((image) => (
@@ -686,8 +703,10 @@ function WorkMosaic() {
           key={image.id}
           className={`${styles.mosaicTile} ${styles[`mosaic_${image.id.replace(/-/g, "_")}`]}`}
           tabIndex={0}
+          data-loaded={loadedTiles[image.id] ? "true" : "false"}
         >
-          {image.type === "video" ? (
+          <div className={styles.mosaicSkeleton} aria-hidden="true" />
+          {loadMedia && image.type === "video" ? (
             <video
               src={image.src}
               className={styles.mosaicVideo}
@@ -696,9 +715,10 @@ function WorkMosaic() {
               loop
               muted
               playsInline
-              preload="auto"
+              preload="metadata"
+              onLoadedData={() => markTileLoaded(image.id)}
             />
-          ) : (
+          ) : loadMedia ? (
             <Image
               src={image.src}
               alt={image.alt}
@@ -707,8 +727,9 @@ function WorkMosaic() {
               quality={100}
               unoptimized
               className={styles.mosaicImage}
+              onLoad={() => markTileLoaded(image.id)}
             />
-          )}
+          ) : null}
         </figure>
       ))}
     </div>

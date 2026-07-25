@@ -2,7 +2,7 @@
   color-scheme: light;
   background: #ffffff;
   color: rgba(0, 0, 0, 0.92);
-  font-family: var(--font-gt-standard), var(--font-body), "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-gt-standard), "Helvetica Neue", Arial, sans-serif;
   padding: var(--space-12) 0 var(--space-16);
 }
 

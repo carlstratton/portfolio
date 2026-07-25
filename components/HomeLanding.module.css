@@ -8,7 +8,7 @@
   min-height: 100vh;
   background: var(--home-bg);
   color: var(--home-text);
-  font-family: var(--font-gt-standard), var(--font-body), "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-gt-standard), "Helvetica Neue", Arial, sans-serif;
   transition: none;
 }
 
@@ -225,6 +225,16 @@
   background: linear-gradient(126deg, rgba(144, 144, 144, 0.05) 0%, rgba(42, 42, 42, 0.05) 100%);
 }
 
+.mosaicSkeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, #f4f4f4 8%, #fbfbfb 18%, #f1f1f1 33%);
+  background-size: 220% 100%;
+  animation: mosaic-skeleton 1.8s ease-in-out infinite;
+}
+
 .mosaicImage {
   position: relative;
   z-index: 1;
@@ -232,6 +242,7 @@
   height: 100% !important;
   border-radius: inherit;
   object-fit: contain;
+  opacity: 0;
   box-shadow: none;
 }
 
@@ -244,7 +255,18 @@
   border-radius: inherit;
   object-fit: cover;
   background: #ffffff;
+  opacity: 0;
   pointer-events: none;
+}
+
+.mosaicTile[data-loaded="true"] .mosaicImage,
+.mosaicTile[data-loaded="true"] .mosaicVideo {
+  opacity: 1;
+}
+
+.mosaicTile[data-loaded="true"] .mosaicSkeleton {
+  opacity: 0;
+  animation: none;
 }
 
 .mosaicTile:focus-visible {
@@ -639,6 +661,15 @@
   }
 }
 
+@keyframes mosaic-skeleton {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
 @media (max-width: 980px) {
   .leftMenu {
     top: 0;
@@ -765,7 +796,8 @@
   .landingButton,
   .leftMenu,
   .heroStatement,
-  .introTabs {
+  .introTabs,
+  .mosaicSkeleton {
     animation: none;
   }
 }

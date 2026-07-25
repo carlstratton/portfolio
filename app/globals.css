@@ -2,7 +2,7 @@
   color-scheme: light;
   --theme-transition: none;
   --heading-color: rgb(19, 19, 19);
-  --font-family: var(--font-body), "Helvetica Neue", Arial, sans-serif;
+  --font-family: var(--font-gt-standard), "Helvetica Neue", Arial, sans-serif;
   --font-ampersand: var(--font-family);
   --bg: #fafafa;
   --bg-strong: #101010;
@@ -84,7 +84,7 @@ h4 {
 
 h1,
 h2 {
-  font-family: var(--font-body, var(--font-family)), var(--font-family);
+  font-family: var(--font-family);
   font-style: normal;
   font-weight: 400;
   color: var(--heading-color);
