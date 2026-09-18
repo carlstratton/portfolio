@@ -58,6 +58,7 @@
   margin: 0 0 var(--space-2);
   font-size: 14px;
   font-weight: 900;
+  letter-spacing: 0;
   color: rgb(19, 19, 19);
 }
 

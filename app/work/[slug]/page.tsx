@@ -1,5 +1,5 @@
 import { CaseStudyWithHomeTrigger } from "@/components/CaseStudyWithHomeTrigger";
-import { getCaseStudies, getCaseStudy, getPublicCaseStudies } from "@/lib/case-studies";
+import { getCaseStudies, getCaseStudy } from "@/lib/case-studies";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -38,7 +38,5 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = getCaseStudy(slug);
   if (!study) return notFound();
 
-  const studies = getPublicCaseStudies();
-
-  return <CaseStudyWithHomeTrigger key={study.slug} study={study} studies={studies} />;
+  return <CaseStudyWithHomeTrigger key={study.slug} study={study} />;
 }

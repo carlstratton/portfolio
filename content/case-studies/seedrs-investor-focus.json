@@ -25,11 +25,12 @@
   ],
   "typeBadges": [
     "Mobile",
-    "Interface Design",
-    "Optimisation"
+    "User Interface",
+    "Cycle iteration"
   ],
   "hero": "/case-studies/hero-SEEDRS.png",
   "badge": "/case-studies/badges/seedrs.png",
+  "avatar": "/case-studies/avatars/seedrs.png",
   "cardImage": "/case-studies/thumbnail-seedrs.png",
   "readTime": 3,
   "summarySections": [
