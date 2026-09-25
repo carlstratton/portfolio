@@ -78,7 +78,7 @@ h3,
 h4 {
   margin: 0 0 var(--space-4);
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0em;
   color: var(--text);
 }
 
