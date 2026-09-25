@@ -18,9 +18,10 @@
 
 .cardTitle {
   margin: 0 0 var(--space-3);
+  color: #131313;
   font-size: 14px;
   font-weight: 700;
-  color: rgb(19, 19, 19);
+  letter-spacing: 0.4px;
 }
 
 .cardDescription {
